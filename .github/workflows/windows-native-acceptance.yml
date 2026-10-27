@@ -56,8 +56,25 @@ jobs:
         run: |
           npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $probe = Start-Job -ScriptBlock {
+            Start-Sleep -Seconds 25
+            $processes = Get-CimInstance Win32_Process | Where-Object { $_.Name -in @('paneforge.exe','msedgewebview2.exe') }
+            $summary = @($processes | ForEach-Object {
+              @{ name=$_.Name;pid=$_.ProcessId;parent=$_.ParentProcessId;debugArguments=([regex]::Matches($_.CommandLine,'--remote-debugging-\S+').Value -join ' ') }
+            })
+            $ports = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -in $processes.ProcessId } | Select-Object LocalAddress, LocalPort, OwningProcess)
+            $answers = @($ports | ForEach-Object {
+              if ($_.LocalAddress -in @('127.0.0.1','0.0.0.0','::','::1')) {
+                try { $response = Invoke-WebRequest -Uri "http://127.0.0.1:$($_.LocalPort)/json/version" -TimeoutSec 2; @{port=$_.LocalPort;status=$response.StatusCode;body=$response.Content.Substring(0,[Math]::Min(400,$response.Content.Length))} }
+                catch { @{port=$_.LocalPort;error=$_.Exception.Message} }
+              }
+            })
+            @{processes=$summary;ports=$ports;http=$answers} | ConvertTo-Json -Depth 6
+          }
           node scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $smokeExit = $LASTEXITCODE
+          $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
+          exit $smokeExit
       - name: Collect isolated startup diagnostics
         if: always()
         shell: pwsh
@@ -87,3 +104,4 @@ jobs:
             native-evidence/**/result.json
             native-evidence/**/*.png
             diagnostics/*
+            startup-probe.json
