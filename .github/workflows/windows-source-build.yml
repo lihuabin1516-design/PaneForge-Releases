@@ -9,8 +9,12 @@ on:
         default: probe
         required: true
       version:
-        description: Exact alpha version to build
+        description: Exact stable or alpha version to build
         type: string
+      source_commit:
+        description: Full Git commit of the corresponding source archive
+        type: string
+        required: false
       source_sha256:
         description: SHA-256 of the corresponding source ZIP
         type: string
@@ -25,7 +29,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/target
       CARGO_BUILD_JOBS: "2"
@@ -43,6 +47,8 @@ jobs:
           node-version: "22"
       - uses: dtolnay/rust-toolchain@stable
         if: inputs.mode == 'build'
+        with:
+          components: rustfmt, clippy
       - name: Fetch and verify corresponding source
         if: inputs.mode == 'build'
         shell: pwsh
@@ -50,10 +56,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BUILD_VERSION: ${{ inputs.version }}
           SOURCE_SHA256: ${{ inputs.source_sha256 }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
         run: |
           if ($env:GITHUB_REPOSITORY -ne 'lihuabin1516-design/PaneForge-Releases') { throw 'Unexpected distribution repository' }
-          if ($env:BUILD_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Invalid alpha version' }
+          if ($env:BUILD_VERSION -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-alpha\.(0|[1-9]\d*))?$') { throw 'Invalid stable/alpha version' }
           if ($env:SOURCE_SHA256 -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid source hash' }
+          if ($env:SOURCE_COMMIT -notmatch '^([a-f0-9]{40}|[a-f0-9]{64})$') { throw 'Invalid source commit' }
           $sourceId = $env:SOURCE_SHA256.ToLowerInvariant().Substring(0, 12)
           $sourceName = "PaneForge_$($env:BUILD_VERSION)_source.zip"
           gh release download "source-v$($env:BUILD_VERSION)-$sourceId" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
@@ -61,15 +69,17 @@ jobs:
           $archive = Join-Path input $sourceName
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $env:SOURCE_SHA256) { throw 'Source hash mismatch' }
           Expand-Archive -LiteralPath $archive -DestinationPath source
+          node source/scripts/windows-preview.mjs verify-source $archive $env:SOURCE_COMMIT
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $product = Get-Content -Raw -LiteralPath source/product-identity.json | ConvertFrom-Json
           if ($product.version -ne $env:BUILD_VERSION -or $product.bundleIdentifier -ne 'com.paneforge.app') { throw 'Source product mismatch' }
-          @{version=$product.version;sourceSha256=$env:SOURCE_SHA256;runId=$env:GITHUB_RUN_ID} | ConvertTo-Json | Set-Content -LiteralPath build-input.json -Encoding utf8
+          @{schema='paneforge.windows-source-build.v1';version=$product.version;sourceCommit=$env:SOURCE_COMMIT;sourceSha256=$env:SOURCE_SHA256.ToLowerInvariant();workflowCommit=$env:GITHUB_SHA;runId=$env:GITHUB_RUN_ID;runAttempt=$env:GITHUB_RUN_ATTEMPT;nodeVersion=(node --version);npmVersion=(npm --version);rustVersion=(rustc --version);cargoLockSha256=(Get-FileHash source/Cargo.lock -Algorithm SHA256).Hash.ToLowerInvariant();npmLockSha256=(Get-FileHash source/package-lock.json -Algorithm SHA256).Hash.ToLowerInvariant()} | ConvertTo-Json | Set-Content -LiteralPath build-input.json -Encoding utf8
       - uses: Swatinem/rust-cache@v2
         if: inputs.mode == 'build'
         with:
           workspaces: source -> ../target
           cache-on-failure: true
-      - name: Verify source and native core
+      - name: Verify complete source and native workspace
         if: inputs.mode == 'build'
         working-directory: source
         shell: pwsh
@@ -80,7 +90,23 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           npx tsc --noEmit
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          npx vitest run web/components/controlplane/BlueprintCreation.test.tsx web/components/controlplane/BlueprintView.test.tsx web/components/controlplane/blueprintModel.test.ts web/services/taskTreeService.test.ts
+          npm run test:coverage -- --reporter=dot --silent
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm run test:tooling
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo fmt --all -- --check
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm run build
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node scripts/build-hook.cjs --release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node scripts/copy-hook.cjs --release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo check --locked --workspace
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo clippy --locked --workspace -- -D warnings
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo test --locked --workspace --no-fail-fast
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           cargo test --locked -p paneforge-core --lib --release --target x86_64-pc-windows-msvc -- --test-threads=1
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
@@ -90,8 +116,14 @@ jobs:
         shell: pwsh
         run: |
           '{"bundle":{"createUpdaterArtifacts":false}}' | Set-Content -LiteralPath unsigned-build.json -Encoding utf8
-          npm run paneforge:build -- --target x86_64-pc-windows-msvc --config unsigned-build.json
+          npm run paneforge:build -- --target x86_64-pc-windows-msvc --config unsigned-build.json -- --locked
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $installer = Join-Path $env:CARGO_TARGET_DIR 'x86_64-pc-windows-msvc/release/bundle/nsis'
+          $installers = @(Get-ChildItem -LiteralPath $installer -Filter '*_x64-setup.exe')
+          if ($installers.Count -ne 1) { throw 'Expected exactly one installer' }
+          $provenance = Get-Content -Raw ../build-input.json | ConvertFrom-Json
+          $provenance | Add-Member installerSha256 (Get-FileHash -LiteralPath $installers[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          $provenance | ConvertTo-Json | Set-Content -LiteralPath ../build-input.json -Encoding utf8
       - name: Install into the isolated runner program directory
         if: inputs.mode == 'build'
         shell: pwsh
@@ -110,13 +142,13 @@ jobs:
         run: |
           npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          node scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          & scripts/distribution/run-native-smoke.ps1 -PlaywrightModule ../browser-tools/node_modules/@playwright/test/index.mjs -ProgramDirectory $env:NATIVE_TEST_PROGRAM -EvidenceDirectory ../native-evidence
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         if: always() && inputs.mode == 'build'
         with:
           name: windows-source-build-${{ inputs.version }}
-          retention-days: 1
+          retention-days: 30
           if-no-files-found: error
           path: |
             target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
