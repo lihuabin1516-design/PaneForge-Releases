@@ -60,6 +60,53 @@ jobs:
         run: |
           npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Text;
+          using System.Runtime.InteropServices;
+          public static class StandardUserAcceptance {
+            [StructLayout(LayoutKind.Sequential)] struct STARTUPINFO {
+              public int cb; public string reserved; public string desktop; public string title;
+              public int x,y,xSize,ySize,xChars,yChars,fill,flags; public short show,reserved2;
+              public IntPtr reservedPointer,input,output,error;
+            }
+            [StructLayout(LayoutKind.Sequential)] struct PROCESS_INFORMATION { public IntPtr process,thread; public uint pid,tid; }
+            [StructLayout(LayoutKind.Sequential)] struct MANDATORY_LABEL { public IntPtr sid; public uint attributes; }
+            [DllImport("advapi32.dll",SetLastError=true)] static extern bool SaferCreateLevel(uint scope,uint level,uint flags,out IntPtr handle,IntPtr reserved);
+            [DllImport("advapi32.dll",SetLastError=true)] static extern bool SaferComputeTokenFromLevel(IntPtr level,IntPtr input,out IntPtr token,uint flags,IntPtr reserved);
+            [DllImport("advapi32.dll")] static extern bool SaferCloseLevel(IntPtr level);
+            [DllImport("advapi32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool ConvertStringSidToSid(string value,out IntPtr sid);
+            [DllImport("advapi32.dll",SetLastError=true)] static extern bool SetTokenInformation(IntPtr token,int kind,IntPtr data,int length);
+            [DllImport("advapi32.dll",SetLastError=true)] static extern bool GetTokenInformation(IntPtr token,int kind,out int value,int size,out int needed);
+            [DllImport("advapi32.dll")] static extern int GetLengthSid(IntPtr sid);
+            [DllImport("advapi32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool CreateProcessAsUser(IntPtr token,string app,StringBuilder command,IntPtr processSecurity,IntPtr threadSecurity,bool inherit,uint flags,IntPtr environment,string cwd,ref STARTUPINFO startup,out PROCESS_INFORMATION process);
+            [DllImport("kernel32.dll")] static extern IntPtr LocalFree(IntPtr pointer);
+            [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+            [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int id);
+            [DllImport("kernel32.dll")] static extern uint WaitForSingleObject(IntPtr handle,uint milliseconds);
+            [DllImport("kernel32.dll")] static extern bool GetExitCodeProcess(IntPtr process,out uint code);
+            static void Check(bool ok,string step) { if(!ok) throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(),step); }
+            public static int Run(string executable,string arguments,string cwd) {
+              IntPtr level=IntPtr.Zero,token=IntPtr.Zero,sid=IntPtr.Zero,label=IntPtr.Zero;
+              try {
+                Check(SaferCreateLevel(1,0x20000,1,out level,IntPtr.Zero),"Create standard-user level");
+                Check(SaferComputeTokenFromLevel(level,IntPtr.Zero,out token,0,IntPtr.Zero),"Create restricted caller token");
+                Check(ConvertStringSidToSid("S-1-16-8192",out sid),"Create medium integrity SID");
+                int size=Marshal.SizeOf(typeof(MANDATORY_LABEL));label=Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(new MANDATORY_LABEL {sid=sid,attributes=0x20},label,false);
+                Check(SetTokenInformation(token,25,label,size+GetLengthSid(sid)),"Set medium integrity");
+                int elevated,needed;Check(GetTokenInformation(token,20,out elevated,4,out needed),"Check restricted elevation");
+                if(elevated!=0) throw new Exception("Refuse elevated acceptance process");
+                Console.WriteLine("ACCEPTANCE_TOKEN elevated=false integrity=medium");
+                var startup=new STARTUPINFO {cb=Marshal.SizeOf(typeof(STARTUPINFO)),flags=0x100,input=GetStdHandle(-10),output=GetStdHandle(-11),error=GetStdHandle(-12)};
+                PROCESS_INFORMATION process;
+                Check(CreateProcessAsUser(token,executable,new StringBuilder("\""+executable+"\" "+arguments),IntPtr.Zero,IntPtr.Zero,true,0x08000000,IntPtr.Zero,cwd,ref startup,out process),"Start ordinary-user native acceptance");
+                try { WaitForSingleObject(process.process,0xffffffff);uint code;Check(GetExitCodeProcess(process.process,out code),"Read acceptance exit");return (int)code; }
+                finally {CloseHandle(process.thread);CloseHandle(process.process);}
+              } finally {if(label!=IntPtr.Zero) Marshal.FreeHGlobal(label);if(sid!=IntPtr.Zero) LocalFree(sid);if(token!=IntPtr.Zero) CloseHandle(token);if(level!=IntPtr.Zero) SaferCloseLevel(level);}
+            }
+          }
+          '@
           $probe = Start-Job -ArgumentList $PWD.Path -ScriptBlock {
             param($sourcePath)
             Start-Sleep -Seconds 25
@@ -130,8 +177,8 @@ jobs:
             } catch { $windowInfo += @{error=$_.Exception.Message} }
             @{processes=$summary;appEnvironment=$appEnvironment;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
-          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS.match(/--remote-debugging-port=\d+/)[0]+" --force-renderer-accessibility";console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
-          $smokeExit = $LASTEXITCODE
+          $nativeArguments = 'scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs "' + $env:NATIVE_TEST_PROGRAM + '" ../native-evidence'
+          $smokeExit = [StandardUserAcceptance]::Run((Get-Command node).Source,$nativeArguments,$PWD.Path)
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
       - name: Collect isolated startup diagnostics
