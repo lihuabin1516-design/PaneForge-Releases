@@ -60,6 +60,21 @@ jobs:
         run: |
           npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          # CDP starts before the initial Tauri target finishes its first navigation.
+          # Wait for that exact target without replacing any feature assertion.
+          @'
+          import {chromium as actual, expect} from './browser-tools/node_modules/@playwright/test/index.mjs';
+          export {expect};
+          export const chromium = {
+            async connectOverCDP(endpoint) {
+              const browser = await actual.connectOverCDP(endpoint);
+              try {
+                await expect.poll(() => browser.contexts().flatMap(context => context.pages()).some(page => /tauri\.localhost|^tauri:/.test(page.url())), {timeout:30000,message:'initial native Tauri target navigation'}).toBe(true);
+                return browser;
+              } catch(error) {await browser.close();throw error;}
+            }
+          };
+          '@ | Set-Content ../native-playwright-readiness.mjs -Encoding utf8
           Add-Type -TypeDefinition @'
           using System;
           using System.Text;
@@ -201,7 +216,7 @@ jobs:
             } catch { $windowInfo += @{error=$_.Exception.Message} }
             @{processes=$summary;appEnvironment=$appEnvironment;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
-          $nativeArguments = 'scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs "' + $env:NATIVE_TEST_PROGRAM + '" ../native-evidence'
+          $nativeArguments = 'scripts/smoke-blueprint-desktop.mjs ../native-playwright-readiness.mjs "' + $env:NATIVE_TEST_PROGRAM + '" ../native-evidence'
           $smokeExit = [StandardUserAcceptance]::Run((Get-Command node).Source,$nativeArguments,$PWD.Path)
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
