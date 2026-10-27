@@ -1,0 +1,89 @@
+name: Windows isolated native acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: paneforge-public-native-acceptance
+  cancel-in-progress: false
+
+jobs:
+  native:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-source-build-0.0.3-alpha.3
+          run-id: 40452372948
+          github-token: ${{ github.token }}
+          path: built
+      - name: Verify frozen source and build provenance
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $expected = '4feb8686e8165f3b7a1d3ae3cd2fd8ee3404420eeb14cce275f40005a42a1c85'
+          if ($env:GITHUB_REPOSITORY -ne 'lihuabin1516-design/PaneForge-Releases') { throw 'Unexpected distribution repository' }
+          $buildProvenance = Get-Content -Raw -LiteralPath built/build-input.json | ConvertFrom-Json
+          if ($buildProvenance.sourceSha256 -ne $expected -or $buildProvenance.version -ne '0.0.3-alpha.3' -or $buildProvenance.runId -ne '40452372948') { throw 'Build provenance mismatch' }
+          gh release download source-v0.0.3-alpha.3-4feb8686e816 --repo $env:GITHUB_REPOSITORY --pattern PaneForge_0.0.3-alpha.3_source.zip --dir input
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          if ((Get-FileHash input/PaneForge_0.0.3-alpha.3_source.zip).Hash -ne $expected) { throw 'Source hash mismatch' }
+          Expand-Archive -LiteralPath input/PaneForge_0.0.3-alpha.3_source.zip -DestinationPath source
+      - name: Install the existing build in isolation
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem -LiteralPath built -Filter PaneForge_0.0.3-alpha.3_x64-setup.exe -Recurse -File)
+          if ($installers.Count -ne 1) { throw 'Expected one frozen installer' }
+          if ((Get-FileHash -LiteralPath $installers[0].FullName).Hash -ne '842b8c2a7714a18f24200185bf163079b6de908697f53d2b739233f52a464d6b') { throw 'Installer hash mismatch' }
+          $program = Join-Path $env:RUNNER_TEMP 'PaneForge-Native-Test'
+          $install = Start-Process -FilePath $installers[0].FullName -ArgumentList @('/S', "/D=$program") -WindowStyle Hidden -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Isolated installation failed: $($install.ExitCode)" }
+          "NATIVE_TEST_PROGRAM=$program" >> $env:GITHUB_ENV
+          Get-ChildItem -LiteralPath $program -File | Select-Object Name, Length, VersionInfo
+          Get-ChildItem -LiteralPath 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients' -ErrorAction SilentlyContinue | Get-ItemProperty | Select-Object name, pv
+      - name: Run the frozen native smoke
+        working-directory: source
+        shell: pwsh
+        run: |
+          npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Collect isolated startup diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path diagnostics -Force | Out-Null
+          function Protect-DiagnosticText([string]$value) {
+            return ($value -replace '(?i)(bearer\s+)[A-Za-z0-9._~+/-]+', '$1[redacted]' -replace '(?i)((?:token|password|secret)["\s:=]+)[^\s,"}]+', '$1[redacted]')
+          }
+          $files = Get-ChildItem -LiteralPath native-evidence -Filter *.log -Recurse -File -ErrorAction SilentlyContinue
+          $index = 0
+          foreach ($file in $files) {
+            $text = Get-Content -Raw -LiteralPath $file.FullName
+            $text = Protect-DiagnosticText $text
+            $text | Set-Content -LiteralPath "diagnostics/startup-$index.log" -Encoding utf8
+            $index++
+          }
+          Get-Process paneforge,msedgewebview2 -ErrorAction SilentlyContinue | Select-Object ProcessName, Id, Path, MainWindowTitle | ConvertTo-Json | Set-Content diagnostics/processes.json
+          $events = Get-WinEvent -FilterHashtable @{LogName='Application';StartTime=(Get-Date).AddMinutes(-15);Level=2} -MaxEvents 10 -ErrorAction SilentlyContinue | Select-Object ProviderName, Id, Message | ConvertTo-Json
+          (Protect-DiagnosticText $events) | Set-Content diagnostics/application-errors.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-acceptance-alpha3
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            native-evidence/**/result.json
+            native-evidence/**/*.png
+            diagnostics/*
