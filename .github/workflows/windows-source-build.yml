@@ -1,0 +1,119 @@
+name: Windows corresponding-source build
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [probe, build]
+        default: probe
+        required: true
+      version:
+        description: Exact alpha version to build
+        type: string
+      source_sha256:
+        description: SHA-256 of the corresponding source ZIP
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paneforge-public-windows-build
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target
+      CARGO_BUILD_JOBS: "2"
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Probe standard Windows runner
+        shell: pwsh
+        run: |
+          [System.Environment]::OSVersion.VersionString
+          rustc --version
+          node --version
+      - uses: actions/setup-node@v4
+        if: inputs.mode == 'build'
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        if: inputs.mode == 'build'
+      - name: Fetch and verify corresponding source
+        if: inputs.mode == 'build'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_VERSION: ${{ inputs.version }}
+          SOURCE_SHA256: ${{ inputs.source_sha256 }}
+        run: |
+          if ($env:GITHUB_REPOSITORY -ne 'lihuabin1516-design/PaneForge-Releases') { throw 'Unexpected distribution repository' }
+          if ($env:BUILD_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Invalid alpha version' }
+          if ($env:SOURCE_SHA256 -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid source hash' }
+          $sourceName = "PaneForge_$($env:BUILD_VERSION)_source.zip"
+          gh release download "v$env:BUILD_VERSION" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $archive = Join-Path input $sourceName
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $env:SOURCE_SHA256) { throw 'Source hash mismatch' }
+          Expand-Archive -LiteralPath $archive -DestinationPath source
+          $product = Get-Content -Raw -LiteralPath source/product-identity.json | ConvertFrom-Json
+          if ($product.version -ne $env:BUILD_VERSION -or $product.bundleIdentifier -ne 'com.paneforge.app') { throw 'Source product mismatch' }
+          @{version=$product.version;sourceSha256=$env:SOURCE_SHA256;runId=$env:GITHUB_RUN_ID} | ConvertTo-Json | Set-Content -LiteralPath build-input.json -Encoding utf8
+      - name: Verify source and native core
+        if: inputs.mode == 'build'
+        working-directory: source
+        shell: pwsh
+        run: |
+          npm ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm run paneforge:identity:check
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npx tsc --noEmit
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npx vitest run web/components/controlplane/BlueprintCreation.test.tsx web/components/controlplane/BlueprintView.test.tsx web/components/controlplane/blueprintModel.test.ts web/services/taskTreeService.test.ts
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cargo test --locked -p paneforge-core --lib --release --target x86_64-pc-windows-msvc -- --test-threads=1
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Build unsigned NSIS package
+        if: inputs.mode == 'build'
+        working-directory: source
+        shell: pwsh
+        run: |
+          '{"bundle":{"createUpdaterArtifacts":false}}' | Set-Content -LiteralPath unsigned-build.json -Encoding utf8
+          npm run paneforge:build -- --target x86_64-pc-windows-msvc --config unsigned-build.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Install into the isolated runner program directory
+        if: inputs.mode == 'build'
+        shell: pwsh
+        env:
+          BUILD_VERSION: ${{ inputs.version }}
+        run: |
+          $installer = Join-Path $env:CARGO_TARGET_DIR "x86_64-pc-windows-msvc/release/bundle/nsis/PaneForge_$($env:BUILD_VERSION)_x64-setup.exe"
+          $program = Join-Path $env:RUNNER_TEMP 'PaneForge-Native-Test'
+          $install = Start-Process -FilePath $installer -ArgumentList @('/S', "/D=$program") -WindowStyle Hidden -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Isolated installation failed: $($install.ExitCode)" }
+          "NATIVE_TEST_PROGRAM=$program" >> $env:GITHUB_ENV
+      - name: Verify native blueprint workflow
+        if: inputs.mode == 'build'
+        working-directory: source
+        shell: pwsh
+        run: |
+          npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always() && inputs.mode == 'build'
+        with:
+          name: windows-source-build-${{ inputs.version }}
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            native-evidence/**/result.json
+            native-evidence/**/*.png
+            build-input.json
