@@ -55,7 +55,7 @@ jobs:
           if ($env:BUILD_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Invalid alpha version' }
           if ($env:SOURCE_SHA256 -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid source hash' }
           $sourceName = "PaneForge_$($env:BUILD_VERSION)_source.zip"
-          gh release download "v$env:BUILD_VERSION" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
+          gh release download "source-v$env:BUILD_VERSION" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $archive = Join-Path input $sourceName
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $env:SOURCE_SHA256) { throw 'Source hash mismatch' }
