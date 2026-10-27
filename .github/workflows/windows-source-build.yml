@@ -44,7 +44,9 @@ jobs:
       - uses: actions/setup-node@v4
         if: inputs.mode == 'build'
         with:
-          node-version: "22"
+          # Match the verified local V8 coverage engine; a floating major can
+          # change branch/function counts without changing tests or source.
+          node-version: "24.19.0"
       - uses: dtolnay/rust-toolchain@stable
         if: inputs.mode == 'build'
         with:
