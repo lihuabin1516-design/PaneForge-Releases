@@ -75,6 +75,21 @@ jobs:
             }
           };
           '@ | Set-Content ../native-playwright-readiness.mjs -Encoding utf8
+          # Chromium does not expose an accessible name on a native dd element.
+          # Keep the same Session ID / Unassigned assertion, using its DOM label.
+          @'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const input=readFileSync('scripts/smoke-blueprint-desktop.mjs','utf8');
+          const before="details.getByRole('definition', { name: 'Session ID' })";
+          const after='details.locator(\'dd[aria-label="Session ID"]\')';
+          assert.equal(input.split(before).length,2,'expected exactly one field locator adjustment');
+          const output=input.replace(before,after);
+          writeFileSync('scripts/smoke-blueprint-hosted.mjs',output,{flag:'wx'});
+          console.log(JSON.stringify({nativeSmokeOriginalSha256:createHash('sha256').update(input).digest('hex'),nativeSmokeAdaptedSha256:createHash('sha256').update(output).digest('hex'),locatorAdjustment:{before,after}}));
+          '@ | node --input-type=module
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           Add-Type -TypeDefinition @'
           using System;
           using System.Text;
@@ -216,7 +231,7 @@ jobs:
             } catch { $windowInfo += @{error=$_.Exception.Message} }
             @{processes=$summary;appEnvironment=$appEnvironment;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
-          $nativeArguments = 'scripts/smoke-blueprint-desktop.mjs ../native-playwright-readiness.mjs "' + $env:NATIVE_TEST_PROGRAM + '" ../native-evidence'
+          $nativeArguments = 'scripts/smoke-blueprint-hosted.mjs ../native-playwright-readiness.mjs "' + $env:NATIVE_TEST_PROGRAM + '" ../native-evidence'
           $smokeExit = [StandardUserAcceptance]::Run((Get-Command node).Source,$nativeArguments,$PWD.Path)
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
