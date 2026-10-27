@@ -63,11 +63,47 @@ jobs:
           $probe = Start-Job -ArgumentList $PWD.Path -ScriptBlock {
             param($sourcePath)
             Start-Sleep -Seconds 25
+            Add-Type -TypeDefinition @'
+          using System;
+          using System.Text;
+          using System.Runtime.InteropServices;
+          public static class NativeEnvironmentProbe {
+            [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+            [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+            [DllImport("kernel32.dll")] static extern bool ReadProcessMemory(IntPtr handle, IntPtr address, byte[] bytes, int size, out IntPtr read);
+            [DllImport("ntdll.dll")] static extern int NtQueryInformationProcess(IntPtr handle, int kind, byte[] info, int size, out int needed);
+            static long Pointer(IntPtr handle, long address) {
+              byte[] bytes = new byte[8]; IntPtr read;
+              if (!ReadProcessMemory(handle, new IntPtr(address), bytes, bytes.Length, out read) || read.ToInt64()!=8) throw new Exception("Pointer read failed");
+              return BitConverter.ToInt64(bytes,0);
+            }
+            public static string[] WebViewOnly(int pid) {
+              IntPtr handle=OpenProcess(0x410,false,pid);
+              if(handle==IntPtr.Zero) throw new Exception("Cannot read owned app");
+              try {
+                byte[] basic=new byte[48];int needed;
+                if(NtQueryInformationProcess(handle,0,basic,basic.Length,out needed)!=0) throw new Exception("Process query failed");
+                long parameters=Pointer(handle,BitConverter.ToInt64(basic,8)+0x20);
+                long environment=Pointer(handle,parameters+0x80);
+                var all=new StringBuilder();
+                for(int offset=0;offset<262144;) {
+                  int size=(int)Math.Min(4096-((environment+offset)%4096),262144-offset);
+                  byte[] bytes=new byte[size];IntPtr read;
+                  if(!ReadProcessMemory(handle,new IntPtr(environment+offset),bytes,size,out read)) throw new Exception("Environment read failed");
+                  all.Append(Encoding.Unicode.GetString(bytes,0,(int)read));offset+=(int)read;
+                  if(all.ToString().Contains("\0\0")) break;
+                }
+                return Array.FindAll(all.ToString().Split('\0'),value=>value.StartsWith("WEBVIEW2_",StringComparison.OrdinalIgnoreCase));
+              } finally { CloseHandle(handle); }
+            }
+          }
+          '@
             $processes = Get-CimInstance Win32_Process | Where-Object { $_.Name -in @('paneforge.exe','msedgewebview2.exe') }
             $summary = @($processes | ForEach-Object {
               @{ name=$_.Name;pid=$_.ProcessId;parent=$_.ParentProcessId;commandLinePresent=($null -ne $_.CommandLine);commandLineLength=$_.CommandLine.Length;commandLine=$_.CommandLine;executable=$_.ExecutablePath;version=(Get-Item -LiteralPath $_.ExecutablePath -ErrorAction SilentlyContinue).VersionInfo.FileVersion }
             })
             $profiles = @(Get-ChildItem -LiteralPath (Join-Path $sourcePath '../native-evidence') -Directory -Recurse -Filter webview -ErrorAction SilentlyContinue | ForEach-Object { @{path=$_.FullName;entries=@(Get-ChildItem -LiteralPath $_.FullName -Force | Select-Object -ExpandProperty Name)} })
+            $appEnvironment = @($processes | Where-Object Name -eq 'paneforge.exe' | ForEach-Object { try { @{pid=$_.ProcessId;webviewEnvironment=[NativeEnvironmentProbe]::WebViewOnly([int]$_.ProcessId)} } catch { @{error=$_.Exception.Message} } })
             $ports = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -in $processes.ProcessId } | Select-Object LocalAddress, LocalPort, OwningProcess)
             $answers = @($ports | ForEach-Object {
               if ($_.LocalAddress -in @('127.0.0.1','0.0.0.0','::','::1')) {
@@ -92,9 +128,9 @@ jobs:
               $bitmap.Save((Join-Path $sourcePath '../native-desktop.png'))
               $graphics.Dispose(); $bitmap.Dispose()
             } catch { $windowInfo += @{error=$_.Exception.Message} }
-            @{processes=$summary;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
+            @{processes=$summary;appEnvironment=$appEnvironment;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
-          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS.match(/--remote-debugging-port=\d+/)[0];console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS.match(/--remote-debugging-port=\d+/)[0]+" --force-renderer-accessibility";console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
           $smokeExit = $LASTEXITCODE
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
