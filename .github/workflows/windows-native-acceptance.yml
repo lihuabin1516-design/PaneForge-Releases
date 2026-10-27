@@ -60,7 +60,8 @@ jobs:
         run: |
           npm install --prefix ../browser-tools --no-package-lock --ignore-scripts @playwright/test@1.58.2
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          $probe = Start-Job -ScriptBlock {
+          $probe = Start-Job -ArgumentList $PWD.Path -ScriptBlock {
+            param($sourcePath)
             Start-Sleep -Seconds 25
             $processes = Get-CimInstance Win32_Process | Where-Object { $_.Name -in @('paneforge.exe','msedgewebview2.exe') }
             $summary = @($processes | ForEach-Object {
@@ -73,9 +74,26 @@ jobs:
                 catch { @{port=$_.LocalPort;error=$_.Exception.Message} }
               }
             })
-            @{processes=$summary;ports=$ports;http=$answers} | ConvertTo-Json -Depth 6
+            $windowInfo = @()
+            try {
+              Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes,System.Windows.Forms,System.Drawing
+              foreach ($item in $processes | Where-Object Name -eq 'paneforge.exe') {
+                $condition = [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, [int]$item.ProcessId)
+                $window = [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children,$condition)
+                if ($null -ne $window) {
+                  $windowInfo += @{name=$window.Current.Name;controls=@($window.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition) | Select-Object -First 100 | ForEach-Object { $_.Current.Name })}
+                }
+              }
+              $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+              $bitmap = [System.Drawing.Bitmap]::new($bounds.Width,$bounds.Height)
+              $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+              $graphics.CopyFromScreen($bounds.Left,$bounds.Top,0,0,$bounds.Size)
+              $bitmap.Save((Join-Path $sourcePath '../native-desktop.png'))
+              $graphics.Dispose(); $bitmap.Dispose()
+            } catch { $windowInfo += @{error=$_.Exception.Message} }
+            @{processes=$summary;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
-          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER,inheritedWebViewKeys:Object.keys(process.env).filter(key=>key.toUpperCase().startsWith("WEBVIEW2"))}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS.match(/--remote-debugging-port=\d+/)[0];console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
           $smokeExit = $LASTEXITCODE
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
@@ -109,3 +127,4 @@ jobs:
             native-evidence/**/*.png
             diagnostics/*
             startup-probe.json
+            native-desktop.png
