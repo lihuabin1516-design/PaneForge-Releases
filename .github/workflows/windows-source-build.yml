@@ -90,7 +90,8 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           npx tsc --noEmit
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          npm run test:coverage -- --reporter=dot --silent
+          New-Item -ItemType Directory -Path ../verification -Force | Out-Null
+          npm run test:coverage -- --reporter=default --reporter=json --outputFile.json=../verification/frontend-results.json --silent 2>&1 | Tee-Object -FilePath ../verification/frontend-coverage.log
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           npm run test:tooling
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
@@ -155,3 +156,5 @@ jobs:
             native-evidence/**/result.json
             native-evidence/**/*.png
             build-input.json
+            verification/**
+            source/coverage/coverage-final.json
