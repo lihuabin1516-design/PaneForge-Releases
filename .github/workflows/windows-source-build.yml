@@ -54,8 +54,9 @@ jobs:
           if ($env:GITHUB_REPOSITORY -ne 'lihuabin1516-design/PaneForge-Releases') { throw 'Unexpected distribution repository' }
           if ($env:BUILD_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Invalid alpha version' }
           if ($env:SOURCE_SHA256 -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid source hash' }
+          $sourceId = $env:SOURCE_SHA256.ToLowerInvariant().Substring(0, 12)
           $sourceName = "PaneForge_$($env:BUILD_VERSION)_source.zip"
-          gh release download "source-v$env:BUILD_VERSION" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
+          gh release download "source-v$($env:BUILD_VERSION)-$sourceId" --repo $env:GITHUB_REPOSITORY --pattern $sourceName --dir input
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $archive = Join-Path input $sourceName
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $env:SOURCE_SHA256) { throw 'Source hash mismatch' }
@@ -63,6 +64,11 @@ jobs:
           $product = Get-Content -Raw -LiteralPath source/product-identity.json | ConvertFrom-Json
           if ($product.version -ne $env:BUILD_VERSION -or $product.bundleIdentifier -ne 'com.paneforge.app') { throw 'Source product mismatch' }
           @{version=$product.version;sourceSha256=$env:SOURCE_SHA256;runId=$env:GITHUB_RUN_ID} | ConvertTo-Json | Set-Content -LiteralPath build-input.json -Encoding utf8
+      - uses: Swatinem/rust-cache@v2
+        if: inputs.mode == 'build'
+        with:
+          workspaces: source -> ../target
+          cache-on-failure: true
       - name: Verify source and native core
         if: inputs.mode == 'build'
         working-directory: source
