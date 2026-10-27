@@ -50,6 +50,10 @@ jobs:
           "NATIVE_TEST_PROGRAM=$program" >> $env:GITHUB_ENV
           Get-ChildItem -LiteralPath $program -File | Select-Object Name, Length, VersionInfo
           Get-ChildItem -LiteralPath 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients' -ErrorAction SilentlyContinue | Get-ItemProperty | Select-Object name, pv
+          foreach ($base in @('HKCU:\SOFTWARE\Policies\Microsoft\Edge','HKLM:\SOFTWARE\Policies\Microsoft\Edge')) {
+            Get-ItemProperty -LiteralPath $base -Name RemoteDebuggingAllowed,DeveloperToolsAvailability -ErrorAction SilentlyContinue | Select-Object PSPath,RemoteDebuggingAllowed,DeveloperToolsAvailability
+            Get-ItemProperty -LiteralPath "$base\WebView2\AdditionalBrowserArguments" -ErrorAction SilentlyContinue
+          }
       - name: Run the frozen native smoke
         working-directory: source
         shell: pwsh
@@ -71,7 +75,7 @@ jobs:
             })
             @{processes=$summary;ports=$ports;http=$answers} | ConvertTo-Json -Depth 6
           }
-          node scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
+          node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER,inheritedWebViewKeys:Object.keys(process.env).filter(key=>key.toUpperCase().startsWith("WEBVIEW2"))}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
           $smokeExit = $LASTEXITCODE
           $probe | Wait-Job -Timeout 35 | Receive-Job | Set-Content ../startup-probe.json
           exit $smokeExit
