@@ -65,8 +65,9 @@ jobs:
             Start-Sleep -Seconds 25
             $processes = Get-CimInstance Win32_Process | Where-Object { $_.Name -in @('paneforge.exe','msedgewebview2.exe') }
             $summary = @($processes | ForEach-Object {
-              @{ name=$_.Name;pid=$_.ProcessId;parent=$_.ParentProcessId;debugArguments=([regex]::Matches($_.CommandLine,'--remote-debugging-\S+').Value -join ' ') }
+              @{ name=$_.Name;pid=$_.ProcessId;parent=$_.ParentProcessId;commandLinePresent=($null -ne $_.CommandLine);commandLineLength=$_.CommandLine.Length;commandLine=$_.CommandLine;executable=$_.ExecutablePath;version=(Get-Item -LiteralPath $_.ExecutablePath -ErrorAction SilentlyContinue).VersionInfo.FileVersion }
             })
+            $profiles = @(Get-ChildItem -LiteralPath (Join-Path $sourcePath '../native-evidence') -Directory -Recurse -Filter webview -ErrorAction SilentlyContinue | ForEach-Object { @{path=$_.FullName;entries=@(Get-ChildItem -LiteralPath $_.FullName -Force | Select-Object -ExpandProperty Name)} })
             $ports = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -in $processes.ProcessId } | Select-Object LocalAddress, LocalPort, OwningProcess)
             $answers = @($ports | ForEach-Object {
               if ($_.LocalAddress -in @('127.0.0.1','0.0.0.0','::','::1')) {
@@ -91,7 +92,7 @@ jobs:
               $bitmap.Save((Join-Path $sourcePath '../native-desktop.png'))
               $graphics.Dispose(); $bitmap.Dispose()
             } catch { $windowInfo += @{error=$_.Exception.Message} }
-            @{processes=$summary;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
+            @{processes=$summary;profiles=$profiles;ports=$ports;http=$answers;windows=$windowInfo} | ConvertTo-Json -Depth 6
           }
           node --input-type=module -e 'import cp from "node:child_process";import {syncBuiltinESMExports} from "node:module";const original=cp.spawn;cp.spawn=function(executable,args,options){if(executable.endsWith("paneforge.exe")){options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS.match(/--remote-debugging-port=\d+/)[0];console.log(JSON.stringify({testWebViewArguments:options.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,testWebViewData:options.env.WEBVIEW2_USER_DATA_FOLDER}));}return original(executable,args,options);};syncBuiltinESMExports();await import("./scripts/smoke-blueprint-desktop.mjs");' scripts/smoke-blueprint-desktop.mjs ../browser-tools/node_modules/@playwright/test/index.mjs $env:NATIVE_TEST_PROGRAM ../native-evidence
           $smokeExit = $LASTEXITCODE
