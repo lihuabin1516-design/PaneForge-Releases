@@ -5,7 +5,7 @@ on:
     inputs:
       mode:
         type: choice
-        options: [probe, build]
+        options: [probe, native-core, build]
         default: probe
         required: true
       version:
@@ -42,18 +42,18 @@ jobs:
           rustc --version
           node --version
       - uses: actions/setup-node@v4
-        if: inputs.mode == 'build'
+        if: inputs.mode != 'probe'
         with:
           # Match the verified local V8 coverage engine; a floating major can
           # change branch/function counts without changing tests or source.
           node-version: "24.19.0"
       # Keep compiler, rustfmt and Clippy aligned with the verified local toolchain.
       - uses: dtolnay/rust-toolchain@1.96.0
-        if: inputs.mode == 'build'
+        if: inputs.mode != 'probe'
         with:
           components: rustfmt, clippy
       - name: Fetch and verify corresponding source
-        if: inputs.mode == 'build'
+        if: inputs.mode != 'probe'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,10 +78,19 @@ jobs:
           if ($product.version -ne $env:BUILD_VERSION -or $product.bundleIdentifier -ne 'com.paneforge.app') { throw 'Source product mismatch' }
           @{schema='paneforge.windows-source-build.v1';version=$product.version;sourceCommit=$env:SOURCE_COMMIT;sourceSha256=$env:SOURCE_SHA256.ToLowerInvariant();workflowCommit=$env:GITHUB_SHA;runId=$env:GITHUB_RUN_ID;runAttempt=$env:GITHUB_RUN_ATTEMPT;nodeVersion=(node --version);npmVersion=(npm --version);rustVersion=(rustc --version);cargoLockSha256=(Get-FileHash source/Cargo.lock -Algorithm SHA256).Hash.ToLowerInvariant();npmLockSha256=(Get-FileHash source/package-lock.json -Algorithm SHA256).Hash.ToLowerInvariant()} | ConvertTo-Json | Set-Content -LiteralPath build-input.json -Encoding utf8
       - uses: Swatinem/rust-cache@v2
-        if: inputs.mode == 'build'
+        if: inputs.mode != 'probe'
         with:
           workspaces: source -> ../target
           cache-on-failure: true
+      - name: Diagnose native core from exact corresponding source
+        if: inputs.mode == 'native-core'
+        working-directory: source
+        shell: pwsh
+        run: |
+          # Faster native regression loop; never replaces the complete build gate.
+          New-Item -ItemType Directory -Path ../verification -Force | Out-Null
+          cargo test --locked -p paneforge-core --lib -- --nocapture 2>&1 | Tee-Object -FilePath ../verification/native-core.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Verify complete source and native workspace
         if: inputs.mode == 'build'
         working-directory: source
@@ -149,9 +158,9 @@ jobs:
           & scripts/distribution/run-native-smoke.ps1 -PlaywrightModule ../browser-tools/node_modules/@playwright/test/index.mjs -ProgramDirectory $env:NATIVE_TEST_PROGRAM -EvidenceDirectory ../native-evidence
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
-        if: always() && inputs.mode == 'build'
+        if: always() && inputs.mode != 'probe'
         with:
-          name: windows-source-build-${{ inputs.version }}
+          name: windows-source-${{ inputs.mode }}-${{ inputs.version }}
           retention-days: 30
           if-no-files-found: error
           path: |
