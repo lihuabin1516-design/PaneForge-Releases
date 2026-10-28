@@ -47,7 +47,8 @@ jobs:
           # Match the verified local V8 coverage engine; a floating major can
           # change branch/function counts without changing tests or source.
           node-version: "24.19.0"
-      - uses: dtolnay/rust-toolchain@stable
+      # Keep compiler, rustfmt and Clippy aligned with the verified local toolchain.
+      - uses: dtolnay/rust-toolchain@1.96.0
         if: inputs.mode == 'build'
         with:
           components: rustfmt, clippy
