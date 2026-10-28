@@ -1,0 +1,63 @@
+name: Windows directory API diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  directory-api:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Observe same-object directory reopen behavior
+        shell: pwsh
+        run: |
+          # Independent API experiment only; this is not product acceptance.
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.ComponentModel;
+          using System.IO;
+          using System.Runtime.InteropServices;
+          using Microsoft.Win32.SafeHandles;
+          public static class DirectoryApiProbe {
+            [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+            static extern SafeFileHandle CreateFileW(string path, uint access, uint share, IntPtr security, uint disposition, uint flags, IntPtr template);
+            [DllImport("kernel32.dll", SetLastError=true)]
+            static extern SafeFileHandle ReOpenFile(SafeFileHandle original, uint access, uint share, uint flags);
+            [DllImport("kernel32.dll", SetLastError=true)]
+            static extern bool GetFileInformationByHandle(SafeFileHandle handle, out FileInfo info);
+            [StructLayout(LayoutKind.Sequential)]
+            struct FileInfo {
+              public uint Attributes;
+              public System.Runtime.InteropServices.ComTypes.FILETIME Created, Accessed, Written;
+              public uint Volume, SizeHigh, SizeLow, Links, IndexHigh, IndexLow;
+            }
+            public static void Run(string root) {
+              using (var original = CreateFileW(root, 0x120089, 3, IntPtr.Zero, 3, 0x02200000, IntPtr.Zero)) {
+                if (original.IsInvalid) throw new Win32Exception(Marshal.GetLastWin32Error(), "CreateFileW root");
+                if (!GetFileInformationByHandle(original, out var before)) throw new Win32Exception(Marshal.GetLastWin32Error(), "original identity");
+                Console.WriteLine("ROOT_OPEN_OK identity={0}:{1}:{2}", before.Volume, before.IndexHigh, before.IndexLow);
+                foreach (uint access in new uint[] { 0x120089, 0x12019f, 0x80000000, 0xc0000000 }) {
+                  foreach (uint flags in new uint[] { 0x02000000, 0x02200000 }) {
+                    using (var reopened = ReOpenFile(original, access, 3, flags)) {
+                      int error = Marshal.GetLastWin32Error();
+                      if (reopened.IsInvalid) {
+                        Console.WriteLine("REOPEN access=0x{0:x8} flags=0x{1:x8} error={2} message={3}", access, flags, error, new Win32Exception(error).Message);
+                        continue;
+                      }
+                      if (!GetFileInformationByHandle(reopened, out var after)) throw new Win32Exception(Marshal.GetLastWin32Error(), "reopened identity");
+                      if (before.Volume != after.Volume || before.IndexHigh != after.IndexHigh || before.IndexLow != after.IndexLow) throw new Exception("Directory identity changed");
+                      Console.WriteLine("REOPEN access=0x{0:x8} flags=0x{1:x8} SAME_OBJECT_OK", access, flags);
+                    }
+                  }
+                }
+              }
+              Console.WriteLine("DIRECTORY_API_PROBE_COMPLETED");
+            }
+          }
+          '@
+          $probeRoot = Join-Path $env:RUNNER_TEMP ('paneforge-directory-api-' + [Guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $probeRoot -ErrorAction Stop | Out-Null
+          [DirectoryApiProbe]::Run($probeRoot)
