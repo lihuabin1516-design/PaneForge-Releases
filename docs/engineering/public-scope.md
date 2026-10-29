@@ -14,7 +14,7 @@ This document defines what belongs in the public distribution repository and wha
 ## Private by default
 
 - unreleased implementation branches and internal design discussions;
-- `.ccpanes-task/`, `.playwright-cli/`, session transcripts, and local task ledgers;
+- `.paneforge-task/`, `.playwright-cli/`, session transcripts, and local task ledgers;
 - provider credentials, update signing keys, API tokens, and runner secrets;
 - user workspace data, repository paths, screenshots, and diagnostic memory dumps;
 - acceptance material that exposes private infrastructure or host identifiers;

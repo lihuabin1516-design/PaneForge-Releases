@@ -98,7 +98,7 @@ Intervention history is scoped to a task node; runtime-recovery history is scope
 
 Delegation and plugin registries are labelled as global records. Their presence or approval status is not evidence that an Agent or plugin process executed. Governance screens expose review/audit context, not operating-system process isolation or permission to execute arbitrary plugin side effects.
 
-The [control-plane visual tour](../README.md#control-plane-visual-tour) explains three historical Windows acceptance captures, including the visible fields and the evidence boundary for each view. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are cropped without version labels. All three use synthetic fixtures and none is a screenshot of the current alpha.3 installer. The current release's Blueprint persistence acceptance is shown at the top of this page.
+The [Control Plane evidence](../README.md#control-plane-evidence) section explains three historical Windows acceptance captures, including the visible fields and the evidence boundary for each view. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are cropped without version labels. All three use synthetic fixtures and none is a screenshot of the current alpha.3 installer. The current release's Blueprint persistence acceptance is shown at the top of this page.
 
 ## Blueprint workflow in development
 
@@ -205,7 +205,7 @@ PaneForge 不提供模型或 Provider 账号。应用元数据保存在本地；
 
 创建任务不会启动 CLI、自动指派 Worker，也不会宣称验收标准已经通过。尚未关联会话的任务会保持未分配状态。
 
-[控制平面图集](../README.zh-CN.md#控制平面图集)逐张说明三幅历史 Windows 验收画面中的可见字段及证据边界。配套 P1.2c UI 验收快照记录测试应用为 `PaneForge DEV v0.0.1`；三张 PNG 本身都裁去了版本标识。它们使用合成 fixture，且都不是当前 alpha.3 安装包画面。当前版蓝图持久化验收图位于本页顶部；图像版本、来源和哈希见[媒体说明](media/README.md)。
+[控制平面证据](../README.zh-CN.md#控制平面证据)逐张说明三幅历史 Windows 验收画面中的可见字段及证据边界。配套 P1.2c UI 验收快照记录测试应用为 `PaneForge DEV v0.0.1`；三张 PNG 本身都裁去了版本标识。它们使用合成 fixture，且都不是当前 alpha.3 安装包画面。当前版蓝图持久化验收图位于本页顶部；图像版本、来源和哈希见[媒体说明](media/README.md)。
 
 ### 蓝图开发线方向，尚未纳入 alpha.3 承诺
 

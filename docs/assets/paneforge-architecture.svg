@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560" role="img" aria-labelledby="title desc">
+  <title id="title">PaneForge 架构图</title>
+  <desc id="desc">React 界面经过类型化服务和 Tauri IPC 进入 Rust 领域服务、Repository、本地持久化和基于 PTY 的 CLI 适配器。Git、已安装 CLI 和配置的 Provider 是外部边界。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 z" fill="#5b8def"/>
+    </marker>
+    <marker id="dashed-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 z" fill="#7c879d"/>
+    </marker>
+    <style>
+      .bg{fill:#101522}.box{fill:#1b2638;stroke:#5b8def;stroke-width:2}.store{fill:#20342f;stroke:#52c7a0;stroke-width:2}.outside{fill:#262d3b;stroke:#7c879d;stroke-width:2}.title{fill:#f4f7fb;font:700 19px Segoe UI,Arial,sans-serif}.label{fill:#e6edf7;font:600 16px Segoe UI,Arial,sans-serif}.small{fill:#aebbd0;font:14px Segoe UI,Arial,sans-serif}.edge{stroke:#5b8def;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.dashed{stroke:#7c879d;stroke-width:2;stroke-dasharray:8 6;fill:none;marker-end:url(#dashed-arrow)}
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1180" height="560" rx="18"/>
+  <text class="title" x="42" y="42">PaneForge 架构 · 公开发布边界</text>
+  <rect x="34" y="68" width="780" height="432" rx="18" fill="#151d2b" stroke="#32415b" stroke-width="2"/>
+  <text class="small" x="58" y="98">PaneForge 桌面进程</text>
+
+  <rect class="box" x="62" y="132" width="188" height="68" rx="12"/>
+  <text class="label" x="156" y="161" text-anchor="middle">React 界面</text><text class="small" x="156" y="183" text-anchor="middle">页面与表单</text>
+  <rect class="box" x="296" y="132" width="188" height="68" rx="12"/>
+  <text class="label" x="390" y="161" text-anchor="middle">Zustand 状态</text><text class="small" x="390" y="183" text-anchor="middle">UI 状态投影</text>
+  <rect class="box" x="530" y="132" width="220" height="68" rx="12"/>
+  <text class="label" x="640" y="161" text-anchor="middle">类型化服务</text><text class="small" x="640" y="183" text-anchor="middle">前端调用边界</text>
+
+  <rect class="box" x="178" y="268" width="220" height="68" rx="12"/>
+  <text class="label" x="288" y="297" text-anchor="middle">Tauri IPC</text><text class="small" x="288" y="319" text-anchor="middle">命令与校验</text>
+  <rect class="box" x="456" y="268" width="220" height="68" rx="12"/>
+  <text class="label" x="566" y="297" text-anchor="middle">Rust 领域服务</text><text class="small" x="566" y="319" text-anchor="middle">领域与生命周期规则</text>
+
+  <rect class="store" x="112" y="410" width="220" height="68" rx="12"/>
+  <text class="label" x="222" y="439" text-anchor="middle">Repository 持久层</text><text class="small" x="222" y="461" text-anchor="middle">持久记录</text>
+  <rect class="store" x="386" y="410" width="220" height="68" rx="12"/>
+  <text class="label" x="496" y="439" text-anchor="middle">SQLite + 文件系统</text><text class="small" x="496" y="461" text-anchor="middle">本地持久化</text>
+  <rect class="box" x="660" y="410" width="152" height="68" rx="12"/>
+  <text class="label" x="736" y="439" text-anchor="middle">PTY 适配器</text><text class="small" x="736" y="461" text-anchor="middle">运行时桥接</text>
+
+  <path class="edge" d="M250 166 H296"/><path class="edge" d="M484 166 H530"/>
+  <path class="edge" d="M640 200 V236 H288 V268"/><path class="edge" d="M398 302 H456"/>
+  <path class="edge" d="M566 336 V374 H222 V410"/><path class="edge" d="M332 444 H386"/>
+  <path class="edge" d="M676 302 V374 H736 V410"/>
+
+  <rect class="outside" x="876" y="126" width="244" height="68" rx="12"/>
+  <text class="label" x="998" y="155" text-anchor="middle">已安装编程 CLI</text><text class="small" x="998" y="177" text-anchor="middle">由 PTY 观察的进程</text>
+  <rect class="outside" x="876" y="264" width="244" height="68" rx="12"/>
+  <text class="label" x="998" y="293" text-anchor="middle">Git 可执行程序</text><text class="small" x="998" y="315" text-anchor="middle">仓库状态与 Diff</text>
+  <rect class="outside" x="876" y="402" width="244" height="68" rx="12"/>
+  <text class="label" x="998" y="431" text-anchor="middle">Provider / 远程运行环境</text><text class="small" x="998" y="453" text-anchor="middle">遵循所选工具策略</text>
+  <path class="edge" d="M812 444 H876 V160"/><path class="dashed" d="M332 444 H876 V298"/><path class="dashed" d="M998 194 V402"/>
+  <text class="small" x="836" y="239" text-anchor="middle">PTY</text><text class="small" x="836" y="378" text-anchor="middle">观察到的状态</text>
+</svg>

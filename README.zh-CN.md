@@ -1,226 +1,221 @@
-# PaneForge 公开版
+# PaneForge
 
-PaneForge 是面向 AI 辅助软件开发的本地优先桌面工作台，供需要同时使用多个编程 CLI、终端和代码仓库的开发者管理并行工作。它整合工作空间、项目、Agent 工作流、Git、文件编辑、会话恢复和交付检查，并以独立的 GPL-3.0 产品身份维护蓝图规划与 Agent 控制平面。应用元数据保存在本地；Agent CLI 和用户配置的 Provider 可能会按照各自策略传输提示词、项目内容或遥测数据，PaneForge 不承诺对话内容永不离开设备。
+## 让 AI 辅助开发过程可见、可恢复、可审查的 Windows 工作台
 
-本仓库是 PaneForge 的公开分发仓库和求职展示入口，不是完整开发仓库镜像。这里发布安装包、更新清单、校验值、对应版本源码 ZIP、公开验收工作流和产品文档；完整开发历史、未发布功能、内部任务文件和用户数据继续保留在私有仓库。
+PaneForge 把代码仓库、多个本地编程 CLI、任务计划、Git 改动和交付证据放进同一个工作空间。它解决的是一个实际问题：当开发工作分散在多个终端和项目目录时，开发者很难回答“哪个项目被改了、原本要完成什么、真实运行了什么、现在还缺哪一步检查”。
 
-![两张验收截图序列：创建后显示主任务、子任务及其说明和验收标准；应用重启后仍保留任务关系并选中原子任务](docs/media/blueprint-alpha3-acceptance.gif)
+这里的 **AI 编程 CLI** 指从终端启动的编程助手。PaneForge 负责组织这些工具及其项目上下文，不提供模型账号，也不替代用户选择的模型服务商（Provider）。
 
-*动图由同一次隔离 Windows 原生验收中的两个独立截图组成：创建主/子任务后，以及应用重启后。它不是连续录屏。可查看[创建后截图](docs/media/blueprint-alpha3-created.png)、[重启后截图](docs/media/blueprint-alpha3-reopened.png)及[原生验收运行](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)。*
+[![最新版本](https://img.shields.io/github/v/release/lihuabin1516-design/PaneForge-Releases?display_name=tag&label=release)](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/latest)
+[![Windows x64](https://img.shields.io/badge/platform-Windows%20x64-2563eb)](#下载与首次运行)
+[![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-2ea44f)](LICENSE)
+[![源码构建](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/workflows/windows-source-build.yml/badge.svg)](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/workflows/windows-source-build.yml)
 
-第一帧显示已保存的主任务和子任务，以及子任务说明和验收标准；第二帧来自应用重启后的另一张截图，展示两个节点仍在、父子关系保留且子任务详情仍被选中。创建操作只写入持久化的 `planned` 计划，不会派发 CLI，也不代表任务完成。
+**当前版本：** `0.0.3-alpha.3` 抢先版 · **原生验收：** Windows x64 · **发布时间：** 2026-10-27
 
-三张历史控制平面面板也有一份紧凑的动态导览：
+[下载 Windows 安装包](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_x64-setup.exe) · [查看对应版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3) · [查看发布证据](docs/engineering/portfolio-evidence.md) · [校验 SHA-256](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/SHA256SUMS.txt)
 
-![PaneForge 控制平面 DEV 导览：依次展示任务树、作用域历史和全局治理面板](docs/media/control-plane-dev-tour.gif)
+![PaneForge Windows 原生验收中的蓝图任务树](docs/media/blueprint-alpha3-created.png)
 
-*动图是带 `[TEST FIXTURE]` 合成数据的面板裁剪图组合，不是实时进程轨迹，也不是当前 alpha.3 安装包画面。*
+这张图片来自已发布抢先版的 Windows 原生验收，展示了已保存的主任务、子任务和选中任务详情。活跃会话区域为空，因此它证明的是任务规划和持久化，不证明当时有 CLI 正在运行。[两帧验收动态图](docs/media/blueprint-alpha3-acceptance.gif)展示了应用重启后同一计划仍然存在。
 
-## 从零认识 PaneForge
+## 60 秒看懂 PaneForge
 
-PaneForge 面向需要同时管理多个 AI 编程会话的开发者。它把项目、终端、工具配置、Git 改动和任务验收信息放在同一桌面工作区，减少在多个命令行窗口、仓库和配置文件之间切换造成的上下文丢失。
+| 读者 | 他们面对的问题 | PaneForge 提供什么 | 可核验材料 |
+| --- | --- | --- | --- |
+| HR / 产品读者 | AI 编程工作散落在终端和项目目录里。 | 一个集中管理项目、会话、计划和交付检查的 Windows 工作台。 | [产品能力地图](docs/product-capabilities.md) |
+| 开发者 | 多个仓库和 CLI 会话容易串台。 | 工作空间/项目上下文、标签页、分屏终端、启动历史、Git 与文件工具。 | [已发布能力列表](docs/product-capabilities.md#desktop-workbench-included-in-alpha3) |
+| 代码审查者 | 看起来成功的聊天记录不能证明代码正确。 | 明确的任务标准、仓库改动、产物、检查结果和审查边界。 | [验证契约](docs/engineering/verification.md) |
+| 技术面试官 | 产品宣传很难对应到真实实现。 | 可浏览源码切片、架构图、测试记录、发布哈希和 Windows 原生证据。 | [工程案例与验收证据](docs/engineering/portfolio-evidence.md) |
 
-对第一次接触这个项目的 HR 或技术面试官来说，可以把它理解为：**先组织代码项目，再启动并行的编程 CLI，最后独立检查仓库改动和交付证据。** PaneForge 不提供模型账号，也不会把 Agent 的聊天输出直接当成代码正确或任务完成的证明。
+### 这个版本到底证明了什么？
 
-```mermaid
-flowchart LR
-  Workspace[工作空间与项目] --> Launch[CLI、运行环境与工具配置]
-  Launch --> Sessions[标签页与分屏终端]
-  Sessions --> Review[Git、文件与本地历史检查]
-  Review --> Plan[蓝图任务与验收标准]
-```
+- **已在 Windows 原生验收：** 蓝图主/子任务创建、验收标准、渲染器刷新和完整应用重启后的持久化、幂等重试与冲突处理、父节点 revision 检查，以及 Windows 发布路径。
+- **已包含在发布源码和安装包能力范围：** 多会话 PTY 终端、工作空间和项目、已安装 CLI 适配器、按配置启用的本机/WSL/SSH 路径、Git 与文件审查工具、MCP/Skill 配置界面、本地历史、会话历史和控制平面记录。
+- **仍在开发中：** 启动预览与失效配置提示、冻结角色/团队模板、定向人工收件箱、汇总交付视图。这些内容不会被写成已发布功能。
 
-这是帮助读者理解产品对象的概念流程，不代表 alpha.3 已把蓝图、会话和交付审查自动串联。当前蓝图任务保存为 `planned` 且未分配，不会启动 CLI。
+公开页坚持区分三类证据：设计目标、发布源码中的能力、Windows 原生验收结果，不能互相替代。
 
-## 功能和公开状态
+## 为什么要做这个产品
 
-| 模块 | 公开版状态 | 能力与开发价值 |
-| --- | --- | --- |
-| 工作空间与项目 | Preview | 工作台概览活跃会话、近期项目、可用 CLI 和使用情况；同时组织仓库、项目配置、布局及项目顺序。 |
-| 分屏终端与布局 | Preview | 以 PTY 和 xterm.js 运行真实终端；支持多标签、可调整分屏、保存布局、滚屏和终端恢复。 |
-| 多 CLI Agent | Preview，依赖用户本机安装 | 包含 Claude Code、Codex CLI、Gemini CLI、Kimi、Grok、OpenCode、Cursor 启动适配；适配器注册表还包含 Pi、OMP、JCode。其他终端命令也可在 PTY 中运行，集成深度因 CLI 而异。 |
-| 本地/WSL/SSH 运行环境 | Preview，依赖环境配置 | 为项目选择本机、WSL 或 SSH 路径，在对应运行环境中启动 CLI 和执行开发工作。 |
-| Agent 工作流 | Preview | 提供 Agent Chat、MCP 主控/Worker 编排、Plans、Specs、Todos、Journal、会话摘要和 Memory。 |
-| 启动配置与共享工具 | Preview | 复用 Provider/模型、运行时、权限、Hooks、Skill 和 MCP 配置；按适用范围配置项目及共享 MCP/Skill。 |
-| Git 与 Worktree | Preview | 查看仓库状态，执行常见 pull/push/fetch/stash、分支、克隆和 Worktree 操作，并检查提交图、Diff、解决冲突。 |
-| 文件浏览与代码编辑 | Preview | 浏览、搜索、创建、重命名、复制、移动和删除项目文件；使用 Monaco 编辑器及 Markdown/图片预览。 |
-| 会话历史与恢复 | Preview，依赖 CLI 支持 | 查看启动历史和会话身份，恢复 CLI 支持的会话，并清理失效会话记录；不同 CLI 的恢复能力有差异。 |
-| 本地文件历史与截图 | Preview | 创建带标签的本地文件版本快照、对比历史 Diff，并用可配置快捷键进行多显示器截图。 |
-| 桌面控制与外观 | Preview | 包含命令面板、系统托盘、快捷终端、资源监控、主题、壁纸及终端/背景外观设置。 |
-| 蓝图任务规划 | Preview | 新建主任务和子任务，保存说明与逐条验收标准；任务创建不会直接派发 CLI。 |
-| PaneForge Agent 控制平面 | Preview | 展示任务树、人工干预/运行恢复历史、委派审查与插件治理记录；记录不证明真实进程执行。 |
-| 插件能力治理 | Preview | 基于 revision 校验和默认拒绝的能力 Broker 管理授权；alpha.3 不开放任意插件宿主副作用。 |
-| 更新与来源验证 | Preview | 发布 Windows x64 抢先版、签名更新清单、校验值、同版本 GPL 源码和自动化验收证据。 |
-| 蓝图执行与交付流程 | Development | 启动预览、冻结团队模板、定向人工交接和集中交付证据尚未包含在当前公开安装包。 |
+当每个 Agent 都只是另一个终端窗口时，AI 辅助开发很难被监督。PaneForge 针对五个高频时刻提供结构化入口：
 
-`Preview` 表示当前公开抢先版包含或有对应源码/验收证据的能力；`Development` 表示私有开发线已设计或实现，但不能从公开安装包推断其已经发布。不同 CLI 的 Hooks、MCP、会话恢复和远程环境支持程度并不完全相同。当前公开安装包面向 Windows x64；具体产品边界见 [公开范围说明](docs/engineering/public-scope.md) 和版本发布说明。
+1. **上下文容易丢失：** 工作空间把仓库、项目默认值、布局、启动历史和会话身份组织在一起。
+2. **意图容易埋在聊天里：** 蓝图允许在 CLI 会话存在之前保存任务说明和验收标准；未绑定执行对象的任务会保持“已规划、未分配”。
+3. **终端输出不能代替代码审查：** Git 状态、Diff、Worktree、文件、编辑器、本地快照可以和终端并排检查。
+4. **重启结果应该可见：** 工作空间、任务、进程/会话和运行时观察分别记录；重启不会被悄悄解释成“任务完成”。
+5. **授权不等于执行：** 任务、干预、恢复、委派和插件记录带有明确的作用域和证据标签，审批记录不会冒充操作系统副作用。
 
-## 模块导览
+完整能力和边界见[产品能力与工作流](docs/product-capabilities.md)。
 
-### 工作空间与项目：把仓库和工作上下文放在一起
+## 五分钟产品导览
 
-工作空间用于组织多个项目；项目保存仓库路径及其工具、布局和启动上下文。概览页还可以查看活跃会话、近期项目和已识别的 CLI，方便开发者先确认“当前在哪个仓库工作、有哪些会话在运行”。这部分适合多仓库或多任务并行的日常开发，不会把不同项目的 Git 历史合并。
+### 1. 组织项目
 
-![PaneForge alpha.3 Windows 原生验收截图：工作空间入口、新建终端、工作空间管理器、Agent Chat 入口、空的活跃会话区域和蓝图面板](docs/media/blueprint-alpha3-created.png)
+创建或导入工作空间，添加仓库，选择启动所使用的项目上下文。发布版和开发版使用隔离的数据目录，试用开发构建不会悄悄复用发布数据。
 
-*这是当前公开材料中最完整的 alpha.3 工作台静态画面。它展示了入口和已持久化的蓝图树；活跃会话区域为空，因此这张图不证明当时有 CLI 进程正在运行。*
+### 2. 打开工作面板
 
-### 并行终端：在同一个工作区运行多个编程 CLI
+在标签页或可调整分屏中打开已安装的编程 CLI。终端是真实的 PTY 执行面，由 xterm.js 渲染；它不是“成功检测器”。
 
-每个终端由 PTY 承载，并由 xterm.js 显示。开发者可以开多个标签页、调整水平/垂直分屏并保存布局，在同一项目或不同项目中并行运行本机安装的 CLI。支持范围包含 Claude Code、Codex CLI、Gemini CLI、Kimi、Grok、OpenCode、Cursor 等适配器；其他命令也可以作为终端进程运行，具体交互能力因 CLI 而异。
+### 3. 先写计划
 
-### 启动配置与运行环境：减少重复配置
+进入 **Agent 控制台 → Blueprint → 新建任务**，填写说明和逐条验收标准，保存主任务后添加子任务。公开 alpha.3 的流程到这里为止：任务会持久化，但不会自动派发 Worker。
 
-启动时可选择 Provider/模型配置、项目、运行环境、权限选项、Hooks、MCP 与 Skills。按环境配置后，项目可经本机、WSL 或 SSH 路径启动。PaneForge 管理的是启动上下文，不提供模型或 Provider 账号；提示词、仓库内容和遥测如何传输由所选 CLI/Provider 的策略决定。
+![蓝图创建与重启后持久化](docs/media/blueprint-alpha3-acceptance.gif)
 
-### Agent 工作流与工具：在终端旁组织协作
+### 4. 独立检查改动
 
-公开版提供 Agent Chat、MCP 主控/Worker 编排，以及 Plans、Specs、Todos、Journal、会话摘要和 Memory 等工作流工具。MCP 用于让 Agent 访问外部工具，Skill 是可复用的指令/工作流包；二者的实际权限仍取决于用户配置和对应运行时。它们帮助组织工作，不代表模型输出会自动验证。
+CLI 结束后查看 Git 状态、Diff、变更文件、本地历史和产物。进程退出或日志看起来成功，仍然需要独立验收。
 
-上面的工作台截图能看到 Agent Chat 和 CLI 入口；alpha.3 的公开原生验收重点是蓝图规划的持久化，不应从这张截图推断发生过真实 Agent 或 MCP 执行。
+### 5. 带着证据交付
 
-### Git、文件与本地历史：独立检查终端之外的结果
+把任务标准、仓库改动、测试输出和发布元数据放在一起，决定接受、返工或交接。当前公开版已经把审查边界呈现出来；集中式交付视图仍在开发中。
 
-仓库视图覆盖分支状态、常用 pull/push/fetch/stash 操作、提交历史、Diff、Worktree、克隆和冲突处理。文件区支持浏览、搜索、创建、重命名、复制、移动和删除，并提供 Monaco 编辑器、Markdown/图片预览。带标签的本地快照可用于比较和恢复文件版本，但 Git 仍是权威版本历史，本地快照也不是备份替代品。
+## 产品界面与真实素材
 
-### 会话连续性与桌面工具：恢复上下文而不是猜测结果
+公开视觉材料明确区分“当前原生验收”与“历史功能说明”。
 
-启动历史保留 CLI 会话身份，用户可以检查历史并恢复所选 CLI 支持的会话；失效记录可以清理。命令面板、托盘、快捷终端、资源监控、壁纸、主题和全局截图快捷键则覆盖桌面端的常用操作。进程恢复不等于任务完成，具体恢复能力由 CLI 和运行环境决定。
+### 原生蓝图证据
 
-### 蓝图与 Agent 控制平面：记录计划、运行状态和审查边界
+![PaneForge 工作空间和蓝图入口](docs/media/blueprint-alpha3-created.png)
 
-蓝图把目标拆成主任务、子任务、说明和可检查的验收标准；控制平面区分任务节点、会话、执行尝试、运行健康、人工干预、恢复、委派审查和插件治理记录。它适合追踪“计划是什么、运行记录属于谁、哪些决定经过审查”。alpha.3 只承诺蓝图创建与持久化，任务尚未绑定或派发到 CLI；控制平面历史截图也会标明其 DEV 版本和合成数据来源。
+原生截图展示工作空间入口、项目/终端入口、Agent 入口和已持久化的蓝图树。[重启后的截图](docs/media/blueprint-alpha3-reopened.png)是另一张验收帧。来源、哈希和 fixture 边界记录在[媒体说明](docs/media/README.md)中。
 
-### 更新与源码追溯：让公开版本可以核验
+### 控制平面证据
 
-当前公开通道发布 Windows x64 抢先版。每个版本提供更新签名、安装包校验值、同版本 GPL 源码 ZIP 和发布验收记录，面试官可以从功能说明继续查看源码样例、构建验证和 Windows 原生验收证据。完整开发历史仍留在私有仓库。
+![控制平面记录导览](docs/media/control-plane-dev-tour.gif)
 
-各功能的发布状态仍以本页的能力表和 [公开范围说明](docs/engineering/public-scope.md) 为准。PaneForge 的产品截图、发布能力和验收范围均以 PaneForge 自己的材料为准。
+这组三帧动态图由历史 Windows 只读面板截图组成，行内容使用合成 fixture。它用于解释任务、干预/恢复和全局治理的作用域，不是实时运行轨迹，也不冒充当前安装包截图。可分别查看[任务树](docs/media/control-plane-task-tree-dev.png)、[历史记录](docs/media/control-plane-history-dev.png)和[治理记录](docs/media/control-plane-governance-dev.png)。
 
-### 视觉证据索引
+当前公开材料还缺少活跃 CLI、Git Diff、编辑器、会话恢复和远程运行环境的脱敏原生截图。缺少的证据会明确列出，不用虚构画面补齐。
 
-| 模块 | 公开视觉材料 | 证据边界 |
-| --- | --- | --- |
-| 工作空间与项目入口 | [alpha.3 静态截图](docs/media/blueprint-alpha3-created.png) | Windows 原生验收截图；显示入口和空的会话区。 |
-| 并行终端与 CLI 启动 | [工作台截图](docs/media/blueprint-alpha3-created.png) | 可看到入口，但不以此图证明有活跃 CLI 进程；运行行为由源码和发布验收文档支撑。 |
-| Agent 工作流、MCP 与 Skill | [工作台截图](docs/media/blueprint-alpha3-created.png) | 可看到 Agent Chat 入口，不推断真实 Agent/MCP 执行。 |
-| 蓝图任务规划 | [alpha.3 验收 GIF](docs/media/blueprint-alpha3-acceptance.gif) | 两张独立 Windows 原生截图，证明创建及重启后持久化。 |
-| 控制平面记录 | [DEV 导览 GIF](docs/media/control-plane-dev-tour.gif)及[三张面板图](#控制平面图集) | 历史 DEV 合成 fixture，不是 alpha.3 安装包截图。 |
-| Git、文件、本地历史、会话恢复和桌面控制 | 当前尚未公开脱敏的 alpha.3 截图 | 能力有文档和源码证据；这里明确标为视觉材料待补，不拿无关图片替代。 |
-
-尚未配图是公开证据的文档缺口，不代表这些模块从产品中消失。后续对这些界面完成隔离原生验收后，会用带版本号的真实截图替换“待补”状态。
-
-## 控制平面图集
-
-以下是 2026-09-19 隔离 Windows 验收期间生成的三张只读控制平面视图，图中记录均为 `[TEST FIXTURE]` 合成测试数据。配套的 P1.2c UI 验收快照记录测试应用为 `PaneForge DEV v0.0.1`；三张 PNG 本身都只截取面板，不包含应用标题栏或版本标识。它们都不是当前 `0.0.3-alpha.3` 安装包的截图。当前公开版验收画面请看本文开头的蓝图持久化序列。
-
-### 任务树与运行时身份
-
-上半部分显示一个“进行中”的父任务及其缩进子任务，子任务状态为“已完成”。下半部分是所选子任务详情：节点 `smoke-child`、父节点 `smoke-root`、会话 `smoke-session` 和尝试 `smoke-attempt-child` 分开列出，同时显示业务状态、运行健康、修订号和更新时间。这样可以核对树关系、选中详情及运行字段是否分别呈现，而不是把任务标题或终端文字当成全部任务记录。
-
-<a href="docs/media/control-plane-task-tree-dev.png"><img src="docs/media/control-plane-task-tree-dev.png" width="339" alt="PaneForge 历史任务树面板：合成父任务状态为进行中，选中的子任务状态为已完成；详情分别列出节点、父节点、会话、尝试 ID、业务状态、运行健康、修订号和更新时间"></a>
-
-行和标识都是测试 fixture。图片证明的是界面如何投影保存的任务/运行字段，不证明曾经启动真实 CLI、Agent 确实完成了任务，也不是当前 alpha.3 安装包画面。详见[任务树与运行时身份说明](docs/product-capabilities.md#task-tree-and-runtime-identity)，或[打开原尺寸图片](docs/media/control-plane-task-tree-dev.png)。
-
-### 人工干预与运行恢复历史
-
-这个视图刻意分开两个作用范围：人工干预账本属于节点 `p12b-node`，列出暂停请求和消息请求，并标出当前及较早的尝试；运行恢复账本属于会话 `p12b-session`，显示所选节点从“已断开”恢复到“就绪”，以及同一会话另一个节点从“降级”恢复到“就绪”。操作者、原因、时间、节点和尝试标记帮助审阅者判断每条记录归属哪个范围和尝试。
-
-<a href="docs/media/control-plane-history-dev.png"><img src="docs/media/control-plane-history-dev.png" width="339" alt="PaneForge 历史只读记录面板，包含合成节点级暂停/消息请求，以及会话级断开或降级到就绪的恢复记录，并标出旧尝试和同会话的其他节点"></a>
-
-这些是合成账本行，不是聊天内容，也不证明人工干预或运行恢复动作真的执行过；该界面为只读。详见[人工干预与运行恢复历史说明](docs/product-capabilities.md#intervention-and-recovery-history)，或[打开原尺寸图片](docs/media/control-plane-history-dev.png)。
-
-### 全局委派与插件记录
-
-左侧“委派评审”标明全局范围，并把决定与理由并列展示：有边界的测试/文档请求获批，生产部署请求被拒绝。右侧“插件注册表”同样标明全局范围，并区分“已启用”的构建检查插件与“已注册”的网络报告插件。顶部提示明确说明：评审和注册记录不代表 Agent 或插件已经执行。
-
-<a href="docs/media/control-plane-governance-dev.png"><img src="docs/media/control-plane-governance-dev.png" width="339" alt="PaneForge 历史全局治理面板：左侧为带审核理由的合成委派决定，右侧为状态不同的插件注册项，并显示记录不证明实际执行的提示"></a>
-
-名称、操作者、授权和决定均为测试 fixture。这是只读投影；图片不证明发生过委派运行、插件启动或副作用，也不证明存在宿主沙箱。详见[全局治理记录说明](docs/product-capabilities.md#global-governance-records)，或[打开原尺寸图片](docs/media/control-plane-governance-dev.png)。
-
-可核对[控制平面功能说明](docs/product-capabilities.md#agent-control-plane-records)、[工程验收案例](docs/engineering/portfolio-evidence.md#case-study-c-scoped-control-plane-projections)和[图片来源、版本与哈希](docs/media/README.md)。
-
-## 下载与更新
-
-- [PaneForge Releases](https://github.com/lihuabin1516-design/PaneForge-Releases/releases)
-- [当前 Windows x64 抢先版](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)
-- [English README](README.md)
-- [产品能力与工作流](docs/product-capabilities.md)
-
-首次使用请安装当前 Release 中的 Windows x64 安装包。后续抢先版可以在 **设置 -> 关于 -> 检查更新** 中发现。安装更新可能重启桌面进程，请先保存正在运行的会话。
-
-发布版数据目录为：
-
-```text
-%USERPROFILE%\.paneforge
-```
-
-开发版使用独立目录 `%USERPROFILE%\.paneforge-dev`，不会静默接管发布版数据。当前公开更新通道只承诺 Windows x64。
-
-## 技术架构
+## 复现已验收流程
 
 ```mermaid
 flowchart LR
-  subgraph UI[桌面 UI]
-    Views[React 页面与面板]
-    State[Zustand 状态]
-    WebServices[类型化前端服务]
-    Views --> State --> WebServices
-  end
-  IPC[Tauri IPC / Commands]
-  Core[Rust 领域服务]
-  Repo[Repository]
-  Store[(SQLite / 文件系统)]
-  PTY[PTY / CLI 适配器]
-  Runtime[本机 CLI 与可选 Provider]
-  WebServices --> IPC --> Core
-  Core --> Repo --> Store
-  Core --> PTY --> Runtime
+  A[安装 Windows x64 抢先版] --> B[创建工作空间和项目]
+  B --> C[创建蓝图主任务和子任务]
+  C --> D[刷新并重启 PaneForge]
+  D --> E[检查父子关系、标准、状态和选中项]
+  E --> F[交接前独立检查 Git 证据]
 ```
 
-PaneForge 将 CLI 进程视为可观察运行时，而不是数据库本身。系统分别记录启动意图、会话身份、任务绑定、输出证据和恢复状态，因此进程中断时不会被错误地标记为“任务已完成”。
+alpha.3 的预期结果是：渲染器刷新和完整应用重启后，父子关系、选中任务、说明、验收标准、`planned` 状态和未分配会话仍然存在。创建任务不表示 CLI 已经运行，也不表示验收已经通过。
 
-当前 alpha.3 蓝图保存的是 `planned`、未分配任务；创建操作不会直接派发 CLI。架构图、任务创建时序图、任务数据边界及公私仓库发布链路见[架构与流程图](docs/architecture/product-map.md)。
+## 给技术面试官的工程入口
 
-## 工程问题与可核验成果
+以下内容按“工程问题 → 设计选择 → 代码入口 → 验证边界”组织，避免只罗列技术名词。
 
-| 工程问题 | 设计与实现 | 可核验证据 |
+| 工程问题 | 设计选择 | 代码/证据入口 | 已验证内容与限制 |
+| --- | --- | --- | --- |
+| 重试不能创建两份计划 | React 保留 request UUID；服务层限制输入；Repository 使用 SQLite immediate transaction。相同内容幂等，不同内容冲突。 | [任务模型](showcase/source/v0.0.3-alpha.3/paneforge-core/src/models/task_tree.rs)、[Repository](showcase/source/v0.0.3-alpha.3/paneforge-core/src/repository/task_tree_repository.rs)、[测试](showcase/source/v0.0.3-alpha.3/paneforge-core/src/services/blueprint_task_creation_tests.rs) | 36 个前端聚焦测试、8 个核心持久化测试；原生重启路径通过。 |
+| 父子写入可能竞态 | 事务内重新检查父节点 revision 和开放状态；运行时投影不能覆盖手工计划。 | [创建时序](docs/architecture/product-map.md#2-blueprint-task-creation-sequence) | 持久化聚焦测试覆盖；alpha.3 不包含派发。 |
+| UI 状态不能冒充运行时事实 | React/Zustand 是投影；类型化服务跨 Tauri IPC；Rust 服务和 Repository 管持久记录；PTY 观察管进程事实。 | [架构源文件](docs/assets/paneforge-architecture.mmd)、[系统概览](docs/architecture/system-overview.md) | 边界有源码依据；可选 CLI/Provider 是否可用仍取决于主机。 |
+| 审批不能变成插件的无限权限 | 请求携带 manifest revision、授权、资源、通道和原因；空 allowlist 默认拒绝；返回类型化授权收据。 | [能力模型](showcase/source/v0.0.3-alpha.3/paneforge-core/src/models/plugin_host.rs)、[Broker](showcase/source/v0.0.3-alpha.3/paneforge-core/src/services/plugin_host_adapter.rs) | 14 个宿主适配器聚焦测试；这是策略契约，不等于操作系统沙箱。 |
+| 二进制必须能追溯到可检查源码 | 发布元数据绑定版本、源码提交、源码 ZIP 哈希、安装包哈希、锁文件/工具链、更新签名和原生验收运行。 | [发布案例](docs/engineering/portfolio-evidence.md#case-study-d-traceable-windows-distribution) | `0.0.3-alpha.3` 源码构建与 Windows 验收已记录；源码浏览目录不是完整源码包。 |
+
+### 面试时可以这样阅读
+
+1. 从 [BlueprintTaskForm.tsx](showcase/source/v0.0.3-alpha.3/web/components/controlplane/BlueprintTaskForm.tsx) 开始，沿着服务层和 Repository 跟踪一次请求。
+2. 讨论为什么“已规划任务”必须保持未分配，再对照原生验收动态图。
+3. 查看 Broker 收据，说明为什么 allowlist 不等于沙箱。
+4. 打开架构源文件，沿着“前端 → 类型化服务 → Tauri IPC → Rust 服务 → Repository”追踪边界。
+5. 最后核对发布证据表里的安装包和源码哈希。
+
+## 架构图
+
+![PaneForge 架构：界面、Tauri IPC、Rust 服务、Repository、本地持久化、PTY 适配器和外部工具](docs/assets/paneforge-architecture.svg)
+
+可编辑源文件是 [paneforge-architecture.mmd](docs/assets/paneforge-architecture.mmd)。图中只表达已核实的调用和权责边界，不是运行录制，也不代表每台机器都安装了所有可选 CLI 或 Provider。
+
+## 我的个人贡献
+
+公开材料可以直接支持以下 PaneForge 产品工作：
+
+| 工作范围 | 产品中可见的贡献 | 证据边界 |
 | --- | --- | --- |
-| 创建任务时遇到超时重试，如何避免重复计划？ | UUID 幂等请求、SQLite immediate transaction；同 UUID 不同内容返回冲突。 | [任务模型、Repository、服务与测试源码](showcase/README.md) |
-| 子任务创建期间父任务状态可能变化，怎么办？ | 在事务中复核父节点 revision 和开放状态，并拒绝过期父节点。 | [任务创建时序图](docs/architecture/product-map.md) |
-| UI reload 或应用重启后计划是否还存在？ | 计划写入本地持久层；原生验收覆盖刷新、renderer reload 和应用重启。 | [验收截图、运行记录和测试数据](docs/engineering/portfolio-evidence.md) |
-| 插件审批是否意味着宿主操作权限？ | 不意味着。Broker 每次检查版本绑定的授权与资源 allowlist；空列表默认拒绝，alpha.3 不开放实际宿主副作用。 | [Broker 实现和验收记录](showcase/README.md) |
-| 安装包如何对应到可检查的源码？ | 固定源码提交、源码 ZIP SHA-256、安装包 SHA-256、发布工作流和隔离 Windows 原生验收分别留证。 | [alpha.3 发布证据](docs/engineering/portfolio-evidence.md) |
+| 产品化 | 产品身份、Windows Bundle 身份、`%USERPROFILE%\.paneforge` 数据路由、更新通道、双语发布页以及公开/私有分发拆分。 | 发布工作流和身份检查公开可核验；逐行作者账本不放入这个发布仓库。 |
+| 规划与审查 | 蓝图主/子任务、验收标准、输入限制、幂等重试、父节点 revision 检查、持久化和重启后选中状态。 | 可浏览源码和 Windows 原生验收运行。 |
+| 控制平面 | 任务、干预/恢复、委派和插件记录按作用域保存，并明确证据边界。 | 历史 UI fixture 和作用域投影案例。 |
+| 能力策略 | revision 绑定授权、资源 allowlist、默认拒绝和类型化收据。 | 公开源码切片和验收记录；alpha.3 不开放任意插件副作用。 |
+| 发布工程 | 对应源码打包、SHA-256 映射、Windows 源码构建工作流、隔离安装和原生 smoke 证据。 | 发布资产和 GitHub Actions 记录。 |
 
-蓝图实现的主要 Rust/React 文件、测试以及精确源码身份见[源码浏览目录](showcase/README.md)。本仓库中的样例逐字节对应已发布标签；它们便于代码导航，不替代 Release 中完整、可构建的 GPL 对应源码 ZIP。
+这里的贡献声明只覆盖公开材料能够追溯的产品工作。发行包仍保留 GPL 版权和许可证声明，不把每个依赖的每一行都写成个人从零实现。完整说明见[修改记录](docs/compliance/source-attribution.md)、[NOTICE](NOTICE.md)和[LICENSE](LICENSE)。
 
-详细文档：
+## 下载与首次运行
 
+### 下载对应版本资产
+
+- [Windows x64 安装包](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_x64-setup.exe)
+- [对应版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)
+- [更新清单](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/latest.json)
+- [安装包签名](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_x64-setup.exe.sig)
+- [SHA-256 校验文件](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/SHA256SUMS.txt)
+- [对应 GPL 源码 ZIP](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_source.zip)
+
+| 资产 | SHA-256 |
+| --- | --- |
+| 安装包 | `842b8c2a7714a18f24200185bf163079b6de908697f53d2b739233f52a464d6b` |
+| 源码 ZIP | `4feb8686e8165f3b7a1d3ae3cd2fd8ee3404420eeb14cce275f40005a42a1c85` |
+
+```powershell
+Get-FileHash .\PaneForge_0.0.3-alpha.3_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\PaneForge_0.0.3-alpha.3_source.zip -Algorithm SHA256
+```
+
+### 复现最小场景
+
+1. 安装 Windows x64 包。安装包没有 Authenticode 签名时，Windows 可能显示安全提示；更新签名是另一层发布完整性机制。
+2. 启动 PaneForge，点击 **Enter Workspace** 或 **Workspace Manager**。
+3. 打开 **Agent 控制台 → Blueprint → 新建任务**。
+4. 添加子任务，刷新渲染器并重启应用。
+5. 确认父子关系、选中详情、`planned` 状态和未分配会话仍然存在。
+
+发布版数据目录为 `%USERPROFILE%\.paneforge`，开发版使用 `%USERPROFILE%\.paneforge-dev`。更新前请保存活跃会话，因为安装可能重启桌面进程。当前公开验证范围是 Windows x64，其他平台及特定 CLI 行为不属于本版承诺。
+
+## 版本、测试与状态
+
+### `0.0.3-alpha.3` 已完成并验证
+
+- 蓝图主任务/子任务创建，支持说明和逐条验收标准。
+- 渲染器刷新和完整应用重启后的持久化。
+- 任务创建的幂等重试与冲突处理。
+- 父节点 revision/开放状态检查，以及防止运行时投影覆盖计划。
+- 默认拒绝能力 Broker 契约和作用域清晰的控制平面投影。
+- Windows x64 源码构建、安装包、隔离安装和蓝图原生 smoke。
+
+证据包括[36 个前端聚焦测试和 8 个核心持久化测试](docs/engineering/portfolio-evidence.md#verification)、源码构建运行中的 1772 个核心测试，以及后续 Windows 原生验收运行。控制平面的历史测试数量已明确标为历史记录，本次文档修改没有重新运行它们。
+
+### 开发中或待补充
+
+- 启动预览和失效配置提示。
+- 冻结角色/团队模板。
+- 定向人工交接收件箱。
+- 汇总 Git、产物和真实验收证据的交付视图。
+- 活跃 CLI、Git Diff、编辑器、会话恢复和远程运行环境的脱敏原生截图。
+- 精确到提交和作者的个人贡献账本。
+
+这些内容只有进入有版本号的安装包，并有对应源码和 Windows 证据后，才会升级为公开版能力。
+
+## 源码、许可证与公开边界
+
+PaneForge 使用 GPL-3.0 发布。每个版本都提供对应源码、保留的版权/许可证声明、修改信息和 `SHA256SUMS.txt`。`showcase/` 目录从对应版本源码快照中复制精选文件，方便面试官直接开始阅读；它不是第二套构建树。完整对应源码压缩包才是该二进制的法律和技术记录。
+
+本公开仓库只放发布资产、验证工作流、源码导航和面向审阅者的文档。用户工作空间、凭据、会话全文、签名密钥、私有历史和未审查诊断信息不会进入公开分发。
+
+## 延伸阅读
+
+- [面试阅读简报](docs/interview-brief.zh-CN.md)
 - [产品能力与工作流](docs/product-capabilities.md)
+- [架构图与任务生命周期](docs/architecture/product-map.md)
+- [运行时与能力边界](docs/architecture/runtime-boundaries.md)
 - [实现案例与验收证据](docs/engineering/portfolio-evidence.md)
+- [验证契约](docs/engineering/verification.md)
+- [公开发布流程](docs/engineering/release-process.md)
 - [源码浏览目录](showcase/README.md)
-- [架构、权责边界与 Mermaid 流程图](docs/architecture/product-map.md)
-- [系统概览](docs/architecture/system-overview.md)
-- [控制平面生命周期](docs/architecture/control-plane.md)
-- [运行时和能力边界](docs/architecture/runtime-boundaries.md)
-- [验证与证据](docs/engineering/verification.md)
-- [发布流程](docs/engineering/release-process.md)
-
-## 阴阳仓库边界
-
-PaneForge 采用两个职责不同的仓库：
-
-1. 阴仓库（私有产品仓库）：完整源码、Git 历史、未发布功能、内部工作流和私有验收材料。
-2. 阳仓库（本仓库）：安装包、对应源码获取入口、公开验证工作流、用户文档和求职展示材料。
-
-以下内容不得进入阳仓库：用户工作空间、Provider 密钥、会话全文、内部任务账本、签名密钥、私有 Git 历史和未审查的诊断转储。每次发布前都要做公开范围审查。
-
-## 对应源码和合规
-
-PaneForge 使用 GPL-3.0 发布。每个二进制 Release 都提供同版本的 `PaneForge_<版本>_source.zip`、`SHA256SUMS.txt` 和来源元数据。源码 ZIP 不包含私有 Git 历史或用户数据。
-
-PaneForge 的产品命名、运行时命名空间、数据目录、控制平面增量、公开文档和验收材料由 PaneForge 独立维护。必要的许可证、修改说明和对应源码记录集中在仓库合规文件中；第三方组件说明见 [NOTICE.md](NOTICE.md) 和 [第三方声明](docs/compliance/third-party-notices.md)。
+- [English README](README.md)
 
 ## 反馈
 
-公开版问题请使用 [GitHub Issues](https://github.com/lihuabin1516-design/PaneForge-Releases/issues)，提交时请说明版本、Windows 版本、复现步骤和相关日志。不要上传 API 密钥、私有工作空间、会话全文或签名材料。安全问题请先阅读 [SECURITY.md](SECURITY.md)。
+可在 [GitHub Issues](https://github.com/lihuabin1516-design/PaneForge-Releases/issues) 提交可复现的公开版问题。不要上传 API 密钥、私有工作空间、会话全文或签名材料。安全问题请阅读 [SECURITY.md](SECURITY.md)。

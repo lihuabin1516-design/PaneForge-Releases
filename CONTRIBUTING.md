@@ -19,7 +19,7 @@ Use a clear title and explain:
 2. which release or workflow is affected;
 3. how links, hashes, and sensitive-content checks were verified.
 
-Use Conventional Commit prefixes such as `docs:`, `ci:`, `fix:`, or `chore:`. Do not commit `.paneforge` data, `.ccpanes-task`, `.playwright-cli`, session transcripts, API keys, update signing material, or local absolute paths.
+Use Conventional Commit prefixes such as `docs:`, `ci:`, `fix:`, or `chore:`. Do not commit `.paneforge` data, `.paneforge-task`, `.playwright-cli`, session transcripts, API keys, update signing material, or local absolute paths.
 
 ## Licensing
 

@@ -1,0 +1,22 @@
+%% PaneForge public architecture, derived from the released source and public verification workflow.
+%% This is a maintained source diagram, not an execution trace.
+flowchart LR
+  subgraph Desktop[PaneForge desktop]
+    UI[React views and panels]
+    Store[Zustand stores]
+    Services[Typed frontend services]
+    IPC[Tauri IPC and commands]
+    Core[Rust domain services]
+    Repo[Repositories]
+    Local[(SQLite and local filesystem)]
+    PTY[PTY and CLI adapters]
+  end
+  CLI[Installed coding CLI]
+  Git[Git executable and repositories]
+  Provider[Configured provider or remote runtime]
+
+  UI --> Store --> Services --> IPC --> Core
+  Core --> Repo --> Local
+  Core --> PTY --> CLI
+  Repo -. repository state .-> Git
+  CLI -. prompts and project data follow selected tool policy .-> Provider
