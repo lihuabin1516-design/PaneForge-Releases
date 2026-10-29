@@ -4,6 +4,10 @@ PaneForge is designed for developers who supervise more than one AI coding sessi
 
 The public installer is a preview. This page separates capabilities present in `0.0.3-alpha.3` from work still in the private development line.
 
+![Two native acceptance snapshots of the Blueprint task tree](media/blueprint-alpha3-acceptance.gif)
+
+*The animation alternates between the task tree after creation and a separate snapshot after app restart. It is assembled from acceptance screenshots, not a continuous recording. See [media provenance](media/README.md).*
+
 ## Product model
 
 ```text

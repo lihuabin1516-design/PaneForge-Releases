@@ -4,6 +4,10 @@ PaneForge 是面向并行 AI 工程的本地优先桌面控制平面。它把多
 
 本仓库是 PaneForge 的公开分发仓库和求职展示入口，不是完整开发仓库镜像。这里发布安装包、更新清单、校验值、对应版本源码 ZIP、公开验收工作流和产品文档；完整开发历史、未发布功能、内部任务文件和用户数据继续保留在私有仓库。
 
+![PaneForge 蓝图任务创建与重启后持久化验收](docs/media/blueprint-alpha3-acceptance.gif)
+
+*动图由同一次隔离 Windows 原生验收中的两个独立截图组成：创建主/子任务后，以及应用重启后。它不是连续录屏。可查看[创建后截图](docs/media/blueprint-alpha3-created.png)、[重启后截图](docs/media/blueprint-alpha3-reopened.png)及[原生验收运行](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)。*
+
 ## 功能和公开状态
 
 | 模块 | 公开版状态 | 说明 |
@@ -39,20 +43,47 @@ PaneForge 是面向并行 AI 工程的本地优先桌面控制平面。它把多
 
 ## 技术架构
 
-```text
-React UI
-  -> Zustand Store / Service
-  -> Tauri IPC
-  -> Rust Command
-  -> Domain Service / Repository
-  -> SQLite / 文件系统 / PTY / Git / 可选远程适配器
+```mermaid
+flowchart LR
+  subgraph UI[桌面 UI]
+    Views[React 页面与面板]
+    State[Zustand 状态]
+    WebServices[类型化前端服务]
+    Views --> State --> WebServices
+  end
+  IPC[Tauri IPC / Commands]
+  Core[Rust 领域服务]
+  Repo[Repository]
+  Store[(SQLite / 文件系统)]
+  PTY[PTY / CLI 适配器]
+  Runtime[本机 CLI 与可选 Provider]
+  WebServices --> IPC --> Core
+  Core --> Repo --> Store
+  Core --> PTY --> Runtime
 ```
 
 PaneForge 将 CLI 进程视为可观察运行时，而不是数据库本身。系统分别记录启动意图、会话身份、任务绑定、输出证据和恢复状态，因此进程中断时不会被错误地标记为“任务已完成”。
 
+当前 alpha.3 蓝图保存的是 `planned`、未分配任务；创建操作不会直接派发 CLI。架构图、任务创建时序图、任务数据边界及公私仓库发布链路见[架构与流程图](docs/architecture/product-map.md)。
+
+## 工程问题与可核验成果
+
+| 工程问题 | 设计与实现 | 可核验证据 |
+| --- | --- | --- |
+| 创建任务时遇到超时重试，如何避免重复计划？ | UUID 幂等请求、SQLite immediate transaction；同 UUID 不同内容返回冲突。 | [任务模型、Repository、服务与测试源码](showcase/README.md) |
+| 子任务创建期间父任务状态可能变化，怎么办？ | 在事务中复核父节点 revision 和开放状态，并拒绝过期父节点。 | [任务创建时序图](docs/architecture/product-map.md) |
+| UI reload 或应用重启后计划是否还存在？ | 计划写入本地持久层；原生验收覆盖刷新、renderer reload 和应用重启。 | [验收截图、运行记录和测试数据](docs/engineering/portfolio-evidence.md) |
+| 插件审批是否意味着宿主操作权限？ | 不意味着。Broker 每次检查版本绑定的授权与资源 allowlist；空列表默认拒绝，alpha.3 不开放实际宿主副作用。 | [Broker 实现和验收记录](showcase/README.md) |
+| 安装包如何对应到可检查的源码？ | 固定源码提交、源码 ZIP SHA-256、安装包 SHA-256、发布工作流和隔离 Windows 原生验收分别留证。 | [alpha.3 发布证据](docs/engineering/portfolio-evidence.md) |
+
+蓝图实现的主要 Rust/React 文件、测试以及精确源码身份见[源码浏览目录](showcase/README.md)。本仓库中的样例逐字节对应已发布标签；它们便于代码导航，不替代 Release 中完整、可构建的 GPL 对应源码 ZIP。
+
 详细文档：
 
 - [产品能力与工作流](docs/product-capabilities.md)
+- [实现案例与验收证据](docs/engineering/portfolio-evidence.md)
+- [源码浏览目录](showcase/README.md)
+- [架构、权责边界与 Mermaid 流程图](docs/architecture/product-map.md)
 - [系统概览](docs/architecture/system-overview.md)
 - [控制平面生命周期](docs/architecture/control-plane.md)
 - [运行时和能力边界](docs/architecture/runtime-boundaries.md)

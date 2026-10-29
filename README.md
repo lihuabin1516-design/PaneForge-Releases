@@ -2,7 +2,13 @@
 
 PaneForge is a local-first control plane for parallel AI engineering. It gives developers one desktop workspace for running CLI agents, terminals, repositories, tasks, tools, and verification evidence without turning the project directory into an opaque automation service.
 
-This repository is the public distribution and engineering showcase for PaneForge. It contains release artifacts, reproducible source references, release verification workflows, and product documentation. The complete development repository remains private.
+This repository is the public distribution and engineering showcase for PaneForge. It contains release artifacts, reproducible source references, selected browseable source from the released version, release verification workflows, and product documentation. The complete development repository and its Git history remain private.
+
+![PaneForge Blueprint task creation and persistence acceptance](docs/media/blueprint-alpha3-acceptance.gif)
+
+*Animated sequence of two screenshots captured by the Windows native acceptance run: the created task tree, then the app after restart. This is not a continuous screen recording.*
+
+[Open the first screenshot](docs/media/blueprint-alpha3-created.png) · [Open the post-restart screenshot](docs/media/blueprint-alpha3-reopened.png) · [Native acceptance run](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)
 
 ## What PaneForge provides
 
@@ -19,6 +25,42 @@ This repository is the public distribution and engineering showcase for PaneForg
 | Blueprint execution policy | Development | Run profiles, frozen team templates, human handoff cards, and delivery evidence are being integrated in the private development line. |
 
 The status labels are deliberate. A capability marked `Development` must not be inferred from the current public installer. See [public scope](docs/engineering/public-scope.md) for the exact boundary.
+
+## How the system is organized
+
+```mermaid
+flowchart LR
+  subgraph UI[Desktop UI]
+    Views[React views and panels]
+    State[Zustand stores]
+    Services[Typed frontend services]
+    Views --> State --> Services
+  end
+  IPC[Tauri IPC and commands]
+  Core[PaneForge core services]
+  Repos[Repositories and local persistence]
+  Runtime[PTY and CLI adapters]
+  Local[(SQLite and filesystem)]
+  Tools[Git, MCP, Skills and providers]
+  Services --> IPC --> Core
+  Core --> Repos --> Local
+  Core --> Runtime --> Tools
+```
+
+This derived component map answers where a user action goes; it is not a replacement for the source contracts. The fuller [architecture and lifecycle diagrams](docs/architecture/product-map.md) identify each boundary and the alpha.3 planning/dispatch split.
+
+## Engineering highlights
+
+| Engineering problem | PaneForge approach | Browseable proof |
+| --- | --- | --- |
+| A planned task must survive retries and restarts | UUID-idempotent creation in an immediate SQLite transaction; a child checks the selected parent's revision and state. | [Task-tree model, repository and tests](showcase/README.md) |
+| Agent output is not proof of task completion | Blueprint plans remain `planned` and unassigned; task planning does not start a CLI or certify acceptance. | [Lifecycle diagram](docs/architecture/product-map.md) |
+| Plugin permissions must not be ambient | Revision-bound manifest/grant checks plus explicit per-resource allowlists; the alpha.3 broker is default-deny and exposes no plugin side effect. | [Capability broker source sample](showcase/source/v0.0.3-alpha.3/paneforge-core/src/services/plugin_host_adapter.rs) |
+| A release must be attributable to exact source | Source commit, ZIP hash, toolchain/lockfiles, installer hash and isolated Windows smoke are recorded independently. | [Release evidence](docs/engineering/portfolio-evidence.md) |
+
+## Browse the code
+
+The [source showcase](showcase/README.md) contains selected unmodified files from the already-published alpha.3 source revision, including implementation and tests. It is a code-navigation aid, not a standalone build tree. The complete corresponding GPL source archive remains attached to the [versioned release](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3).
 
 ## Current download
 
@@ -48,6 +90,8 @@ The important design boundary is that a CLI session is an observed runtime, not 
 More detail:
 
 - [Product capabilities and workflow](docs/product-capabilities.md)
+- [Architecture, authority boundaries and Mermaid flows](docs/architecture/product-map.md)
+- [Implementation and acceptance evidence](docs/engineering/portfolio-evidence.md)
 - [System overview](docs/architecture/system-overview.md)
 - [Control-plane lifecycle](docs/architecture/control-plane.md)
 - [Runtime and capability boundaries](docs/architecture/runtime-boundaries.md)
@@ -84,6 +128,46 @@ Use [GitHub Issues](https://github.com/lihuabin1516-design/PaneForge-Releases/is
 
 PaneForge 是一个面向并行 AI 工程的本地优先桌面控制平面：把多个 CLI Agent、PTY 终端、工作空间、项目、任务、Git、MCP、Skill 和验收证据放进同一套可恢复、可审查的工作流。应用元数据保存在本地；Agent CLI 和用户配置的 Provider 可能会按照各自策略传输提示词、项目内容或遥测数据，PaneForge 不承诺对话内容永不离开设备。
 
+![PaneForge 蓝图任务创建和持久化验收截图序列](docs/media/blueprint-alpha3-acceptance.gif)
+
+*动态图在两张 Windows 原生验收截图之间切换：先显示创建的任务树，再显示应用重启后的状态。它不是连续录屏。* [查看首张静态图](docs/media/blueprint-alpha3-created.png) · [查看重启后静态图](docs/media/blueprint-alpha3-reopened.png) · [查看原生验收运行](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)
+
 本仓库是公开分发仓库和求职展示入口，包含 Windows 安装包、对应源码索引、校验值、发布验证工作流和产品文档；完整开发源码、未发布功能和内部工作流仍保留在私有仓库。当前公开安装包是 Windows x64 抢先版，公开能力与开发线能力的边界见 [公开范围说明](docs/engineering/public-scope.md)、[产品能力与工作流](docs/product-capabilities.md) 和 [中文说明](README.zh-CN.md)。
 
 PaneForge 的发布数据目录是 `%USERPROFILE%\.paneforge`，开发版使用 `%USERPROFILE%\.paneforge-dev`。安装包、对应源码 ZIP、SHA-256 校验和以及 GPL-3.0 合规信息会在每个版本的 GitHub Release 中一并提供。
+
+### 系统结构
+
+```mermaid
+flowchart LR
+  subgraph UI[桌面界面]
+    Views[React 页面与面板]
+    State[Zustand 状态]
+    Services[类型化前端服务]
+    Views --> State --> Services
+  end
+  IPC[Tauri IPC 与命令]
+  Core[PaneForge Core 服务]
+  Repos[Repository 与本地持久化]
+  Runtime[PTY 与 CLI 适配器]
+  Local[(SQLite 与文件系统)]
+  Tools[Git、MCP、Skill 与 Provider]
+  Services --> IPC --> Core
+  Core --> Repos --> Local
+  Core --> Runtime --> Tools
+```
+
+这是描述用户操作如何流经系统的派生图，不替代源码契约。更完整的 [架构、权责边界和流程图](docs/architecture/product-map.md) 解释 alpha.3 规划与执行之间的界线。
+
+### 工程问题与实现证据
+
+| 工程问题 | PaneForge 的处理方式 | 可浏览证据 |
+| --- | --- | --- |
+| 任务重试或重启后不能产生重复计划 | 使用 UUID 幂等请求和 SQLite immediate transaction；子任务校验父节点 revision 和状态。 | [任务树代码与测试](showcase/README.md) |
+| Agent 输出不等于任务验收 | 蓝图任务保持 `planned`、未分配；创建计划不会启动 CLI，也不代表验收通过。 | [任务生命周期图](docs/architecture/product-map.md) |
+| 插件不能默认继承宿主权限 | revision 绑定的 manifest/grant 校验，加上逐资源 allowlist；alpha.3 broker 默认拒绝，且不暴露插件副作用。 | [能力 Broker 源码样例](showcase/source/v0.0.3-alpha.3/paneforge-core/src/services/plugin_host_adapter.rs) |
+| 每个发布包都要对应可核验的源码 | 分开记录源码 commit、ZIP hash、工具链/锁文件、安装包 hash 和隔离 Windows 冒烟验收。 | [发布验收证据](docs/engineering/portfolio-evidence.md) |
+
+### 直接浏览代码
+
+[源码展示目录](showcase/README.md)收录了已公开 alpha.3 源码版本中少量未改写的实现文件和测试，方便在 GitHub 上阅读，不是独立构建树。完整 GPL 对应源码仍在[版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)提供。
