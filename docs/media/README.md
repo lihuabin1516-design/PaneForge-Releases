@@ -10,6 +10,14 @@ The GIF is a two-frame animation made from two separate acceptance snapshots. Ea
 | `blueprint-alpha3-reopened.png` | Separate frame after application restart; both tasks and their parent-child relationship remain, and the child stays selected | `4ab79b5deec164122a27ed58911495239d8b5b4475621030074b9670437c841f` |
 | `blueprint-alpha3-acceptance.gif` | Two-snapshot animated sequence | `d6a798321f1bf1d358007a0908aa67dadb0600cf921912f3e764901128082a3e` |
 
+The public README also contains a compact Control Plane tour assembled from the three historical DEV panel captures:
+
+| File | Meaning | SHA-256 |
+| --- | --- | --- |
+| `control-plane-dev-tour.gif` | Three-frame sequence: task tree, scoped intervention/recovery history, and global delegation/plugin governance | `4fcdebfe00f6e7697b28fa3717d152ae3b56ea066009e83bf00e218999417e7c` |
+
+The Control Plane GIF is a presentation derivative, not a new acceptance run. Each frame is a panel crop from the DEV captures described below, with synthetic `[TEST FIXTURE]` rows and no user data. It has no claim of continuous recording, live process execution, or alpha.3 installer identity.
+
 Source evidence: the local acceptance result recorded `nativeVersion=0.0.3-alpha.3`, root and child creation, selection after refresh, renderer reload and application restart as passed, with empty `pageErrors` and `cleanupErrors`. The public run link is the canonical evidence owner; this README only records how its images were presented.
 
 ## Historical Control Plane Captures
@@ -26,4 +34,4 @@ The image bytes match the corresponding files in the published `v0.0.3-alpha.3` 
 
 ## Presentation Reference
 
-The official [CC-Panes README](https://github.com/wuxiran/cc-pane/blob/a313dd1d0e88e520781e48ed684977364b4e7da4/README.md) was checked on 2026-10-29 at upstream `main` HEAD `a313dd1d0e88e520781e48ed684977364b4e7da4` (commit dated 2026-10-12; its changelog identifies `0.12.21`). It places a hero capture first, then presents features one at a time with explanatory copy, a guide link, and a feature-specific GIF with a static-image fallback. PaneForge follows that structure for the three Control Plane views and explains visible fields, scope, and evidence limits beside each image. No upstream README image asset is reused.
+This media index follows a PaneForge-first presentation: a native acceptance sequence appears before the module-specific evidence, and every historical panel is accompanied by its capture date, fixture boundary, and verification hash. No third-party product image, author profile, contact detail, or QR code is used as PaneForge branding.

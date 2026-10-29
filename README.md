@@ -1,6 +1,6 @@
 # PaneForge
 
-PaneForge is a local-first desktop engineering workbench for developers who run AI coding CLIs in parallel. It brings projects, terminals, agent workflows, Git, files, and review evidence together without hiding work inside an opaque automation service. PaneForge is built on a modified GPL-3.0 CC-Panes desktop-workspace foundation and adds its own product identity, Blueprint planning, and control-plane layer.
+PaneForge is a local-first desktop engineering workbench for developers who run AI coding CLIs in parallel. It brings projects, terminals, agent workflows, Git, files, and review evidence together without hiding work inside an opaque automation service. PaneForge is maintained as an independent GPL-3.0 product with its own product identity, Blueprint planning, and control-plane layer.
 
 This repository is the public distribution and engineering showcase for PaneForge. It contains release artifacts, reproducible source references, selected browseable source from the released version, release verification workflows, and product documentation. The complete development repository and its Git history remain private.
 
@@ -11,6 +11,81 @@ This repository is the public distribution and engineering showcase for PaneForg
 Frame 1 shows the saved root and child, with the child description and acceptance criterion. Frame 2 is a separate post-restart snapshot: both tasks remain, the parent link is intact, and the child remains selected. Creation persists a `planned` task; it does not dispatch a CLI or certify completion.
 
 [Open the first screenshot](docs/media/blueprint-alpha3-created.png) · [Open the post-restart screenshot](docs/media/blueprint-alpha3-reopened.png) · [Native acceptance run](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)
+
+## Product tour: what each module is for
+
+For someone meeting PaneForge for the first time, the short version is: organize repositories, launch parallel coding CLIs, and inspect the resulting changes and evidence from one desktop workspace. The diagram below is a conceptual workflow, not a claim that alpha.3 automatically connects every step. Blueprint tasks in this release are saved as `planned` and unassigned; creating one does not launch a CLI.
+
+```mermaid
+flowchart LR
+  Workspace[Workspace and projects] --> Launch[CLI, runtime and tool setup]
+  Launch --> Sessions[Tabbed and split terminals]
+  Sessions --> Review[Git, files and local history]
+  Review --> Plan[Blueprint tasks and criteria]
+```
+
+### Workspace and projects
+
+Workspaces group projects; each project keeps its repository path, tool settings, layouts and launch context. The overview surfaces active sessions, recent projects and detected CLI tools so a developer can see where work is happening before opening another terminal. Git history remains separate for each repository.
+
+![PaneForge alpha.3 native acceptance snapshot showing the workspace entry, New Terminal, Workspace Manager, Agent Chat entry point, empty active-session area and Blueprint panel](docs/media/blueprint-alpha3-created.png)
+
+*This static alpha.3 acceptance frame is the clearest public overview of the product surface. It shows the entry points and a persisted Blueprint tree; the empty active-session area is intentional, so this image is not evidence of a running CLI process.*
+
+### Parallel terminals and CLI launch
+
+Each terminal is backed by a PTY and rendered with xterm.js. Use tabs and resizable horizontal or vertical splits to keep multiple CLI sessions visible, then save layouts for repeatable workspace arrangements. Released adapters cover Claude Code, Codex CLI, Gemini CLI, Kimi, Grok, OpenCode and Cursor; other commands can run as terminal processes. Integration depth varies by CLI.
+
+### Launch profiles, providers and runtimes
+
+Launch context can include a project, provider/model profile, local/WSL/SSH route, permission options, Hooks, MCP servers and Skills. Profiles reduce repeated setup; runtime routes let a project use the environment where its tools and files are available. PaneForge does not provide model accounts, and data handling is determined by the selected CLI/provider.
+
+### Agent workflows and shared tools
+
+Agent Chat, bounded MCP leader/worker orchestration, Plans, Specs, Todos, Journals, session summaries and Memory sit alongside the terminal workflow. MCP connects an Agent to configured external tools; Skills package reusable instructions and workflows. Their actual permissions still depend on the configured server, CLI and account. These features organize work; they do not make model output self-verifying.
+
+The overview screenshot above shows the Agent Chat and CLI entry points. The public alpha.3 acceptance evidence focuses on durable Blueprint planning; it does not claim that the screenshot represents a live Agent run.
+
+### Git, files and local history
+
+Repository tools cover branch status, common pull/push/fetch/stash operations, history, diffs, worktrees, cloning and conflict handling. The file browser can search, create, rename, copy, move and delete files; Monaco provides code editing plus Markdown/image previews. Labeled local snapshots help compare or recover file versions, but Git remains the authoritative history and local snapshots are not a backup system.
+
+### Session continuity and desktop controls
+
+Launch history keeps CLI session identity available for inspection and supported-session resume. The command palette, tray, quick terminal, resource monitor, themes, wallpaper and global screenshot shortcut cover repeated desktop actions. Restoring a process is not proof that its task passed; resume behavior depends on the CLI and runtime.
+
+### Blueprint and Agent Control Plane
+
+Blueprint records parent/child tasks, descriptions and observable acceptance criteria. Control Plane views distinguish task nodes, sessions, attempts, runtime health, human interventions, recoveries, delegation reviews and plugin-governance records. This makes planning and review state easier to inspect without treating terminal output as the system of record. In alpha.3, task creation is persisted planning only: tasks are not assigned or dispatched to a CLI.
+
+![Two Windows acceptance snapshots showing a Blueprint parent and child, then the persisted task tree after restart](docs/media/blueprint-alpha3-acceptance.gif)
+
+*This is the current alpha.3 native acceptance animation and is assembled from two separate screenshots, not a continuous recording. The [Control Plane visual tour](#control-plane-visual-tour) uses clearly labeled historical DEV captures with synthetic fixtures; they are not alpha.3 installer screenshots.*
+
+The three historical Control Plane panels are available as a compact animated tour:
+
+![PaneForge Control Plane DEV tour cycling through task tree, scoped history and global governance panels](docs/media/control-plane-dev-tour.gif)
+
+*This derivative cycles through panel crops with `[TEST FIXTURE]` data. It is not a live process trace or a current alpha.3 installer screen.*
+
+### Updates and source traceability
+
+The public channel currently targets Windows x64 preview packages. Each release pairs the installer and updater signature with checksums, a matching GPL source archive and verification evidence, so reviewers can follow a product claim to the source snapshot and native acceptance record.
+
+See [product capabilities](docs/product-capabilities.md) for the full release boundary and [implementation evidence](docs/engineering/portfolio-evidence.md) for source and verification links.
+
+### Visual evidence map
+
+| Module | Public visual | Evidence boundary |
+| --- | --- | --- |
+| Workspace and project entry | [alpha.3 static frame](docs/media/blueprint-alpha3-created.png) | Native acceptance snapshot; shows entry points and an empty session area. |
+| Parallel terminals and CLI launch | [overview frame](docs/media/blueprint-alpha3-created.png) | Entry points are visible; no active CLI process is claimed by this image. Runtime behavior is covered by source and release verification docs. |
+| Agent workflows, MCP and Skills | [overview frame](docs/media/blueprint-alpha3-created.png) | Agent Chat entry point is visible; no live Agent/MCP execution is inferred. |
+| Blueprint planning | [alpha.3 acceptance GIF](docs/media/blueprint-alpha3-acceptance.gif) | Two separate native snapshots prove creation and persistence after restart. |
+| Control Plane records | [DEV tour GIF](docs/media/control-plane-dev-tour.gif) and [three panel crops](#control-plane-visual-tour) | Historical DEV captures with synthetic fixtures; not alpha.3 installer screenshots. |
+| Git, files, local history, session resume and desktop controls | No sanitized alpha.3 screenshot is published yet | Capability is documented and source-traceable; public visual evidence is intentionally marked pending rather than substituted with unrelated images. |
+
+The missing visuals are a documentation-evidence gap, not a claim that the modules are absent from the product. They will be replaced by versioned native captures when an isolated acceptance run covers those surfaces.
 
 ## What PaneForge provides
 
@@ -33,7 +108,7 @@ Frame 1 shows the saved root and child, with the child description and acceptanc
 | Updates and source traceability | Preview | Publishes Windows x64 preview packages with updater signatures, hashes, matching GPL source archives, and automated verification. |
 | Blueprint execution and delivery workflow | Development | Run profiles, frozen team templates, human handoff cards, and consolidated delivery evidence are not included in the current public installer. |
 
-The status labels are deliberate. CLI-specific features such as hooks, session restoration, and MCP behavior are not identical across integrations. A capability marked `Development` must not be inferred from the current public installer. PaneForge began from the CC-Panes `0.12.20` foundation and selectively adopted changes from `0.12.21`; it is not a claim of complete upstream feature parity. See [upstream provenance](docs/compliance/upstream-provenance.md) and [public scope](docs/engineering/public-scope.md) for the exact boundary.
+The status labels are deliberate. CLI-specific features such as hooks, session restoration, and MCP behavior are not identical across integrations. A capability marked `Development` must not be inferred from the current public installer. The current public installer is a Windows x64 preview; exact release boundaries are recorded in [public scope](docs/engineering/public-scope.md) and the versioned release notes.
 
 ## Control Plane visual tour
 
@@ -153,7 +228,7 @@ See [the release process](docs/engineering/release-process.md) and [the verifica
 
 ## Legal and provenance
 
-PaneForge is released under [GPL-3.0](LICENSE). Its product name, runtime namespace, data directory, release process, documentation, control-plane additions, and acceptance material are maintained as PaneForge work on top of modified GPL-covered foundation code. The [upstream provenance record](docs/compliance/upstream-provenance.md) identifies the foundation and explains the modification and source obligations.
+PaneForge is released under [GPL-3.0](LICENSE). Its product name, runtime namespace, data directory, release process, documentation, control-plane additions, and acceptance material are maintained as PaneForge work. Required attribution, modification notices, and corresponding-source details remain in the repository's compliance records.
 
 Third-party notices and source obligations are summarized in [NOTICE.md](NOTICE.md) and [third-party notices](docs/compliance/third-party-notices.md).
 

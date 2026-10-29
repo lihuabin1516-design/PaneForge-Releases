@@ -48,7 +48,7 @@ For readers new to AI development tooling: a CLI is a coding tool launched from 
 | Use desktop controls | Open the command palette, tray and quick-terminal controls, resource monitoring, themes, wallpaper, and terminal/background appearance settings. | Desktop utility features; host-specific behaviors require Windows verification. |
 | Install and verify | Use the signed Windows x64 update channel and download the matching GPL source archive and checksums. | PaneForge release infrastructure; current public channel is Windows x64 preview. |
 
-The foundation list describes capabilities present in the release source and installer, not a promise that every third-party CLI feature is identical or enabled by default. PaneForge began from CC-Panes `0.12.20` and selectively adopted changes from `0.12.21`; it is not a full merge or complete feature-parity claim. Upstream `0.12.21` also documents cross-platform desktop installers and browser/Android access; the PaneForge `0.0.3-alpha.3` public artifact and native acceptance scope is Windows x64 desktop, so those upstream clients are not claimed as available PaneForge products in this release. Compare the [official CC-Panes 0.12.21 feature catalog](https://github.com/wuxiran/cc-pane/blob/v0.12.21/README.md) and [changelog](https://github.com/wuxiran/cc-pane/blob/v0.12.21/CHANGELOG.zh-CN.md) with [PaneForge upstream provenance](compliance/upstream-provenance.md).
+The capability list describes what is present in the PaneForge release source and installer. Third-party CLI behavior still varies by installed tool, provider, account, host, and runtime. The `0.0.3-alpha.3` public artifact and native acceptance scope are Windows x64 desktop; browser, mobile, and other host clients are outside this release promise. The exact source, license, and modification records are kept in the corresponding-source package and repository compliance files.
 
 ## Capabilities in the public preview
 
@@ -126,7 +126,7 @@ The alpha.3 native acceptance run covers Blueprint task creation and persistence
 
 ## Release lineage and evidence
 
-The public product release described here is `0.0.3-alpha.3`, whose corresponding GPL source is published with the [versioned release](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3). PaneForge's initial foundation was derived from CC-Panes `0.12.20`; selected changes from `0.12.21` were later adapted and re-verified. The upstream version is a lineage reference, not PaneForge's product version, and does not imply that every upstream feature or commit is present. The release and modification record is in [upstream provenance](compliance/upstream-provenance.md).
+The public product release described here is `0.0.3-alpha.3`, whose corresponding GPL source is published with the [versioned release](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3). The release archive, source hash, checksums, and Windows acceptance record identify this exact PaneForge build; they are the authority for what this version contains.
 
 ## Design principles
 
@@ -140,8 +140,7 @@ The public product release described here is `0.0.3-alpha.3`, whose correspondin
 ## Current limitations
 
 - The public update channel currently targets Windows x64 preview packages.
-- The published artifact and native acceptance scope is the Windows x64 desktop app. This release does not claim upstream browser or Android clients as available PaneForge products.
-- The upstream project's macOS/Linux packages are also outside the current PaneForge public-release promise.
+- The published artifact and native acceptance scope is the Windows x64 desktop app. Browser, Android, macOS, and Linux packages are outside the current public-release promise.
 - PaneForge does not include model access or guarantee a specific CLI/provider's uptime or behavior.
 - Process isolation and capability governance do not sandbox arbitrary third-party CLI behavior beyond the operating-system and tool permissions in effect.
 - Blueprint execution and delivery features described as `Development` are not part of the alpha.3 product promise.
@@ -190,7 +189,7 @@ PaneForge 不只有蓝图和控制平面页面。当前公开安装包还包含�
 | 桌面工具与外观 | 使用命令面板、系统托盘、快捷终端、资源监控、主题、壁纸及终端/背景外观设置。 | 桌面工具功能；依赖 Windows 的行为仍需在 Windows 验证。 |
 | 安装与验证 | 使用 Windows x64 签名更新通道，并下载对应 GPL 源码压缩包和校验值。 | PaneForge 发布基础设施；当前公开更新通道为 Windows x64 抢先版。 |
 
-基础能力表描述的是当前发布源码和安装包中存在的功能，不意味着每个第三方 CLI 的能力完全相同或默认启用。PaneForge 最初基于 CC-Panes `0.12.20`，后续选择性移植并重新验收 `0.12.21` 的部分改进；这不是整仓合并，也不表示与上游完全功能对等。上游 `0.12.21` 还列出了跨平台桌面安装包和浏览器/Android 访问；PaneForge `0.0.3-alpha.3` 公开发布及原生验收范围是 Windows x64 桌面端，因此本版不把这些上游客户端描述为已提供的 PaneForge 产品。可对照[上游官方 0.12.21 功能目录](https://github.com/wuxiran/cc-pane/blob/v0.12.21/README.md)和[更新日志](https://github.com/wuxiran/cc-pane/blob/v0.12.21/CHANGELOG.zh-CN.md)，并查看[PaneForge 上游来源说明](compliance/upstream-provenance.md)。
+基础能力表描述的是当前 PaneForge 发布源码和安装包中存在的功能，不意味着每个第三方 CLI 的能力完全相同或默认启用。`0.0.3-alpha.3` 的公开发布及原生验收范围是 Windows x64 桌面端；浏览器、Android、macOS 和 Linux 客户端不属于本版公开承诺。准确的源码、许可证和修改记录以对应源码压缩包及仓库合规文件为准。
 
 ### 当前公开抢先版
 
@@ -232,13 +231,12 @@ alpha.3 原生验收覆盖了蓝图任务创建，以及刷新和应用重启后
 
 ### 发布版本与来源
 
-本文描述的公开产品版本是 `0.0.3-alpha.3`，对应 GPL 源码随[版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)提供。PaneForge 最初基于 CC-Panes `0.12.20`，后续选择性吸收并重新验收 `0.12.21` 的部分变更。上游版本是来源线索，不是 PaneForge 产品版本，也不表示已包含上游全部功能或提交。详细修改和来源记录见[上游来源说明](compliance/upstream-provenance.md)。
+本文描述的公开产品版本是 `0.0.3-alpha.3`，对应 GPL 源码随[版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)提供。源码提交、源代码哈希、安装包校验值和 Windows 原生验收记录共同定义本版 PaneForge 的实际范围。
 
 ### 当前限制
 
 - 公开更新通道目前面向 Windows x64 抢先版。
-- 当前发布安装包和原生验收范围是 Windows x64 桌面端；本版不宣称上游的浏览器或 Android 客户端已作为 PaneForge 产品提供。
-- 上游项目的 macOS/Linux 安装包也不属于当前 PaneForge 公开版承诺范围。
+- 当前发布安装包和原生验收范围是 Windows x64 桌面端；浏览器、Android、macOS 和 Linux 客户端不属于当前公开版承诺范围。
 - PaneForge 不包含模型访问，也不保证具体 CLI/Provider 的可用性和行为。
 - 会话隔离及能力治理不等于对任意第三方 CLI 实施操作系统级沙箱。
 - 标记为 `Development` 的蓝图执行及交付能力不是 alpha.3 的产品承诺。

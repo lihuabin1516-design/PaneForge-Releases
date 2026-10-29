@@ -64,7 +64,7 @@ sequenceDiagram
   alt same UUID and same content is retried
     Repo-->>Core: Return existing durable record
   else UUID conflicts or parent is stale/closed
-    Repo-->>Form: Return explicit conflict; no duplicate child
+    Repo-->>Form: Return explicit conflict and reject duplicate child
   end
 ```
 
@@ -118,9 +118,9 @@ flowchart LR
   Private[Private PaneForge repository<br/>full source and development history]
   Tag[Versioned source commit]
   Archive[Corresponding GPL source ZIP<br/>without private Git history or user data]
-  Build[Public Windows source-build workflow\nsource hash and commit verified]
+  Build[Public Windows source-build workflow<br/>source hash and commit verified]
   Acceptance[Isolated installer and native smoke]
-  Release[Public release\ninstaller, signature, checksums, source]
+  Release[Public release<br/>installer, signature, checksums, source]
   Samples[Selected browseable files<br/>exact copies from the released tag]
   Private --> Tag --> Archive --> Build --> Acceptance --> Release
   Tag --> Samples

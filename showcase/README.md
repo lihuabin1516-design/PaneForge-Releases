@@ -9,7 +9,7 @@ This folder contains selected, unmodified source files from the already-publishe
 - Source ZIP SHA-256: `4feb8686e8165f3b7a1d3ae3cd2fd8ee3404420eeb14cce275f40005a42a1c85`
 - Release: [PaneForge 0.0.3-alpha.3](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3)
 
-All files under [`source/v0.0.3-alpha.3`](source/v0.0.3-alpha.3) are copied verbatim from that tag. The application is GPL-3.0; see the repository [LICENSE](../LICENSE) and [source provenance](../docs/compliance/upstream-provenance.md).
+All files under [`source/v0.0.3-alpha.3`](source/v0.0.3-alpha.3) are copied verbatim from that release tag. The application is GPL-3.0; see the repository [LICENSE](../LICENSE), [NOTICE](../NOTICE.md), and the corresponding-source records.
 
 ## Read the Blueprint persistence slice
 
