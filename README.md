@@ -1,6 +1,6 @@
 # PaneForge
 
-PaneForge is a local-first control plane for parallel AI engineering. It gives developers one desktop workspace for running CLI agents, terminals, repositories, tasks, tools, and verification evidence without turning the project directory into an opaque automation service.
+PaneForge is a local-first desktop engineering workbench for developers who run AI coding CLIs in parallel. It brings projects, terminals, agent workflows, Git, files, and review evidence together without hiding work inside an opaque automation service. PaneForge is built on a modified GPL-3.0 CC-Panes desktop-workspace foundation and adds its own product identity, Blueprint planning, and control-plane layer.
 
 This repository is the public distribution and engineering showcase for PaneForge. It contains release artifacts, reproducible source references, selected browseable source from the released version, release verification workflows, and product documentation. The complete development repository and its Git history remain private.
 
@@ -16,18 +16,24 @@ Frame 1 shows the saved root and child, with the child description and acceptanc
 
 | Area | Public preview status | What it does |
 | --- | --- | --- |
-| Workspace and project control | Preview | Keeps projects, runtime choices, providers, layouts, and task context grouped by workspace. |
-| Multi-CLI terminal | Preview | Runs several CLI sessions in split panes and tabs through PTY-backed terminals. |
-| Agent launch context | Preview | Preserves the project path, runtime, provider, skill, MCP, and session metadata used for a launch. |
-| Blueprint task board | Preview | Creates parent and child tasks with descriptions and acceptance criteria; planning is saved locally before a session is started. |
-| Agent Control Plane records | Preview | Shows task trees, scoped intervention/recovery histories, and global delegation/plugin records; records are not proof of process execution. |
-| Git and worktree tools | Preview | Exposes branch status and common repository operations next to the active terminal. |
-| File history and editor | Preview | Provides a local history timeline, diffs, file browsing, and an in-app code editor. |
-| MCP and Skill configuration | Preview | Keeps tool and skill selection visible at workspace/project boundaries. |
-| Updates and provenance | Preview | Ships Windows x64 preview packages, updater signatures, checksums, corresponding source archives, and automated verification. |
-| Blueprint execution policy | Development | Run profiles, frozen team templates, human handoff cards, and delivery evidence are being integrated in the private development line. |
+| Workspaces and projects | Preview | Provides a workspace command center for active sessions, recent projects, available CLIs, and usage context; organizes repositories, settings, layouts, and project order. |
+| Terminal workspace | Preview | Runs real PTY-backed CLI sessions in resizable split panes and tabs, with saved layouts, scrollback, and recovery support. |
+| CLI integrations | Preview; requires local CLI setup | Includes launch adapters for Claude Code, Codex CLI, Gemini CLI, Kimi, Grok, OpenCode, and Cursor; the adapter registry also contains Pi, OMP, and JCode integrations. Other terminal commands can run in a PTY; feature depth varies by CLI. |
+| Local and remote runtimes | Preview; environment-dependent | Supports local, WSL, and SSH project routes where configured, so a terminal can work against the selected project environment. |
+| Agent workflow tools | Preview | Brings Agent Chat, bounded MCP leader/worker orchestration, Plans, Specs, Todos, Journals, session summaries, and Memory alongside terminal sessions. |
+| Launch profiles and shared tooling | Preview | Reuses provider/model, runtime, permission, hook, Skill, and MCP choices; supports project and shared MCP/Skill configuration where applicable. |
+| Git and worktrees | Preview | Provides repository status and common pull/push/fetch/stash operations, branches, clone, worktrees, commit topology, diffs, and conflict resolution. |
+| Files and editing | Preview | Browse, search, create, rename, copy, move, and delete project files; edit with Monaco and preview Markdown/images. |
+| Session continuity | Preview | Keeps launch history and session identity available to inspect, resume supported sessions, and clean up broken-session records. Resume behavior depends on the CLI. |
+| Local history and screenshots | Preview | Offers labeled local file-history snapshots and diff review, plus multi-monitor screenshot capture with a configurable shortcut. |
+| Desktop controls and appearance | Preview | Includes command palette, tray and quick-terminal controls, resource monitoring, themes, wallpaper, and terminal/background appearance settings. |
+| Blueprint planning | Preview | Creates and persists parent and child tasks with descriptions and acceptance criteria; creating a task does not dispatch a CLI. |
+| PaneForge Control Plane | Preview | Displays task-tree, intervention/recovery, delegation, and plugin-governance records; records are not proof of process execution. |
+| Plugin capability policy | Preview | Uses revision-bound approvals and a default-deny broker; the alpha.3 release does not expose arbitrary plugin host side effects. |
+| Updates and source traceability | Preview | Publishes Windows x64 preview packages with updater signatures, hashes, matching GPL source archives, and automated verification. |
+| Blueprint execution and delivery workflow | Development | Run profiles, frozen team templates, human handoff cards, and consolidated delivery evidence are not included in the current public installer. |
 
-The status labels are deliberate. A capability marked `Development` must not be inferred from the current public installer. See [public scope](docs/engineering/public-scope.md) for the exact boundary.
+The status labels are deliberate. CLI-specific features such as hooks, session restoration, and MCP behavior are not identical across integrations. A capability marked `Development` must not be inferred from the current public installer. PaneForge began from the CC-Panes `0.12.20` foundation and selectively adopted changes from `0.12.21`; it is not a claim of complete upstream feature parity. See [upstream provenance](docs/compliance/upstream-provenance.md) and [public scope](docs/engineering/public-scope.md) for the exact boundary.
 
 ## Control Plane visual tour
 
@@ -147,7 +153,7 @@ See [the release process](docs/engineering/release-process.md) and [the verifica
 
 ## Legal and provenance
 
-PaneForge is released under [GPL-3.0](LICENSE). The product name, runtime namespace, data directory, release process, documentation, control-plane additions, and acceptance material are maintained as PaneForge work. The distribution also contains modified GPL-covered foundation code; the required attribution and modification record is kept in [upstream provenance](docs/compliance/upstream-provenance.md), rather than copied into the product narrative.
+PaneForge is released under [GPL-3.0](LICENSE). Its product name, runtime namespace, data directory, release process, documentation, control-plane additions, and acceptance material are maintained as PaneForge work on top of modified GPL-covered foundation code. The [upstream provenance record](docs/compliance/upstream-provenance.md) identifies the foundation and explains the modification and source obligations.
 
 Third-party notices and source obligations are summarized in [NOTICE.md](NOTICE.md) and [third-party notices](docs/compliance/third-party-notices.md).
 
