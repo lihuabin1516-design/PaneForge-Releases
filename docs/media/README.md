@@ -20,6 +20,21 @@ The Control Plane GIF is a presentation derivative, not a new acceptance run. Ea
 
 Source evidence: the local acceptance result recorded `nativeVersion=0.0.3-alpha.3`, root and child creation, selection after refresh, renderer reload and application restart as passed, with empty `pageErrors` and `cleanupErrors`. The public run link is the canonical evidence owner; this README only records how its images were presented.
 
+## Isolated product tour
+
+The home screenshot and three two-frame GIFs were captured from a locally built Windows instance displaying PaneForge 0.0.3-alpha.3, using a separate demo data directory. They are product-interface examples, not acceptance evidence for the published installer.
+
+The demo workspace, task titles, and repository changes are synthetic. PaneForge started one local PowerShell terminal in the demo repository. The workbench GIF shows read-only Git status and diff checks scoped to src/hello.ts; that fixture change existed before capture. No Agent CLI or model provider was launched. The settings GIF shows configuration controls only, not external tool execution. The bottom status strip containing the machine-local path was cropped from these images.
+
+Each GIF presents two real UI states for 1.5 seconds per frame. They are short state-transition tours, not continuous screen recordings.
+
+| File | What it shows | SHA-256 |
+| --- | --- | --- |
+| `paneforge-overview.png` | Workbench home, isolated demo project, waiting local terminal, and task overview | `A9D201E75DEC5F1FB53C0A7E19DDBEB593E1F8124E2CC4117752C6FB22D80EE7` |
+| `paneforge-workbench-tour.gif` | Workspace tree, scoped Git status, and the corresponding source diff | `89D30BB005C0EE47B4CC73CECEBCDAA7EA950AE5ED782E4A1BF26BA3C3ED6E5E` |
+| `paneforge-tasks-tour.gif` | Synthetic TodoList entry and task detail | `B77D52CA74754B73BA6D3055F837D5515C677A678C1EDD3EC3A2EC8FC317302F` |
+| `paneforge-settings-tour.gif` | Run configuration summary and application theme selector | `608F79E814AA39E0E427FD4C5F5DD85CE0D6912E6E3654BF338EF8352CE69983` |
+
 ## Historical Control Plane Captures
 
 The three `control-plane-*-dev.png` panels below were captured on 2026-09-19 during isolated Windows acceptance of the Control Plane views. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are panel crops without app chrome or version labels. These are historical feature-evidence images, not current alpha.3 installer screenshots. All visible rows are explicitly labelled `[TEST FIXTURE]` and use synthetic identities. They contain no real workspace, conversation, credential or customer record. Their full-screen acceptance reports include private local paths and process identifiers, so those reports are not copied into this public repository.

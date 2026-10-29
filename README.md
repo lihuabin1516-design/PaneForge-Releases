@@ -15,9 +15,9 @@ In this page, an **AI coding CLI** means a coding assistant launched from a term
 
 [Download the Windows installer](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_x64-setup.exe) · [Open the versioned release](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3) · [Read the release evidence](docs/engineering/portfolio-evidence.md) · [Verify SHA-256](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/SHA256SUMS.txt)
 
-![PaneForge Blueprint task tree after a real Windows acceptance run](docs/media/blueprint-alpha3-created.png)
+![PaneForge workbench home with project, terminal, and task overview](docs/media/paneforge-overview.png)
 
-The image is a real Windows acceptance frame from the published preview. It shows a saved parent task, a child task, and the selected task details. The active-session area is empty, so this image is evidence of planning and persistence, not evidence of a running CLI. The [two-frame acceptance animation](docs/media/blueprint-alpha3-acceptance.gif) shows the same plan after application restart.
+This screenshot comes from a locally built, isolated PaneForge 0.0.3-alpha.3 demo instance; it is not acceptance evidence for the corresponding release. The project and tasks are synthetic fixtures. Its PowerShell terminal is waiting for input and does not show an Agent performing work.
 
 ## PaneForge in 60 seconds
 
@@ -74,7 +74,25 @@ Use the task criteria, repository evidence, test output, and release metadata to
 
 ## Interface evidence
 
-The public visual set intentionally separates live acceptance material from historical feature material.
+The public visual set distinguishes isolated local demos, versioned native acceptance evidence, and historical feature material.
+
+### Workspace, terminal, and Git review
+
+![Workspace tree, terminal tab, and Git change review](docs/media/paneforge-workbench-tour.gif)
+
+This two-frame tour shows the workspace project tree, then Git status and a diff in a local PowerShell terminal. The change to `src/hello.ts` was prepared in the synthetic demo repository before capture; the GIF runs only read-only status and diff checks scoped to that file. It demonstrates PaneForge's terminal and review surfaces, not an Agent-authored change or a passing acceptance result.
+
+### TodoList task management
+
+![TodoList overview opening a task detail](docs/media/paneforge-tasks-tour.gif)
+
+The animation opens a synthetic task from the list and shows its status, priority, workspace scope, description, and activity record. The title and content do not come from a real project or user workspace.
+
+### Run configuration and appearance
+
+![Run configuration summary and application theme settings](docs/media/paneforge-settings-tour.gif)
+
+This tour shows the run-profile summary and theme selector. CLI, MCP, and Skill information in the settings surface proves only that configuration controls exist; it does not mean this capture invoked an external tool, model provider, or remote runtime. No credential values are shown.
 
 ### Native Blueprint evidence
 
@@ -88,7 +106,7 @@ The native frame shows the workspace entry, project/terminal entry points, Agent
 
 This three-frame tour is assembled from historical read-only Windows panel captures with synthetic fixture rows. It explains task scope, intervention/recovery scope, and global governance scope; it is not a live trace and is not presented as a screenshot of the current installer. Open the [task tree](docs/media/control-plane-task-tree-dev.png), [history](docs/media/control-plane-history-dev.png), or [governance](docs/media/control-plane-governance-dev.png) panel for the original crops.
 
-The current public material still needs sanitized native captures of an active CLI, Git diff, editor, session recovery, and remote runtime. Those gaps are stated openly instead of being filled with invented screenshots.
+The public material still lacks sanitized native captures of a real Agent/CLI conversation, the code editor, session recovery, and remote runtime. This update adds local terminal, task-list, and configuration views without presenting them as Agent execution evidence.
 
 ## Reproduce the verified path
 

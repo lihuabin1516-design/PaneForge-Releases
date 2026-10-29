@@ -15,9 +15,9 @@ PaneForge 把代码仓库、多个本地编程 CLI、任务计划、Git 改动�
 
 [下载 Windows 安装包](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/PaneForge_0.0.3-alpha.3_x64-setup.exe) · [查看对应版本发布页](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/tag/v0.0.3-alpha.3) · [查看发布证据](docs/engineering/portfolio-evidence.md) · [校验 SHA-256](https://github.com/lihuabin1516-design/PaneForge-Releases/releases/download/v0.0.3-alpha.3/SHA256SUMS.txt)
 
-![PaneForge Windows 原生验收中的蓝图任务树](docs/media/blueprint-alpha3-created.png)
+![PaneForge 工作台首页：项目、终端与任务概览](docs/media/paneforge-overview.png)
 
-这张图片来自已发布抢先版的 Windows 原生验收，展示了已保存的主任务、子任务和选中任务详情。活跃会话区域为空，因此它证明的是任务规划和持久化，不证明当时有 CLI 正在运行。[两帧验收动态图](docs/media/blueprint-alpha3-acceptance.gif)展示了应用重启后同一计划仍然存在。
+该截图来自本地构建的 PaneForge 0.0.3-alpha.3 隔离演示实例，不是对应 Release 的验收证据。界面中的项目和任务均为合成演示数据；终端是本机 PowerShell，状态为“等待输入”，不代表 Agent 已执行工作。
 
 ## 60 秒看懂 PaneForge
 
@@ -74,7 +74,25 @@ CLI 结束后查看 Git 状态、Diff、变更文件、本地历史和产物。�
 
 ## 产品界面与真实素材
 
-公开视觉材料明确区分“当前原生验收”与“历史功能说明”。
+公开视觉材料区分本地隔离演示界面、版本原生验收证据与历史功能说明。
+
+### 工作空间、终端与 Git 变更
+
+![工作空间项目树、终端标签和 Git 变更检查](docs/media/paneforge-workbench-tour.gif)
+
+两帧动图依次展示工作空间项目树、本机 PowerShell 终端中的 Git 状态和差异。演示仓库的 `src/hello.ts` 变更在采集前预置；动图中只执行了针对该文件的只读状态与差异检查。它展示的是 PaneForge 终端和代码审查入口，不表示 Agent 创建了这项改动，也不表示验收通过。
+
+### TodoList 任务管理
+
+![TodoList 从任务概览切换到任务详情](docs/media/paneforge-tasks-tour.gif)
+
+动图展示合成演示任务从清单进入详情，包含状态、优先级、工作空间、描述和活动记录。任务标题与内容不来自真实项目或用户数据。
+
+### 运行配置与应用外观
+
+![运行配置和应用主题设置](docs/media/paneforge-settings-tour.gif)
+
+动图展示运行配置摘要与主题选择页面。配置界面中的 CLI、MCP 和 Skill 信息仅证明相应配置入口存在，不证明本次演示调用了外部工具、模型服务或远程环境；画面不包含凭据值。
 
 ### 原生蓝图证据
 
@@ -88,7 +106,7 @@ CLI 结束后查看 Git 状态、Diff、变更文件、本地历史和产物。�
 
 这组三帧动态图由历史 Windows 只读面板截图组成，行内容使用合成 fixture。它用于解释任务、干预/恢复和全局治理的作用域，不是实时运行轨迹，也不冒充当前安装包截图。可分别查看[任务树](docs/media/control-plane-task-tree-dev.png)、[历史记录](docs/media/control-plane-history-dev.png)和[治理记录](docs/media/control-plane-governance-dev.png)。
 
-当前公开材料还缺少活跃 CLI、Git Diff、编辑器、会话恢复和远程运行环境的脱敏原生截图。缺少的证据会明确列出，不用虚构画面补齐。
+当前公开材料仍缺少真实 Agent/CLI 对话、代码编辑器、会话恢复和远程运行环境的脱敏原生截图。本轮素材补充的是本机终端、任务清单及配置界面，不将它们描述成 Agent 执行证据。
 
 ## 复现已验收流程
 
