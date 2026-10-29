@@ -4,9 +4,11 @@ PaneForge is a local-first control plane for parallel AI engineering. It gives d
 
 This repository is the public distribution and engineering showcase for PaneForge. It contains release artifacts, reproducible source references, selected browseable source from the released version, release verification workflows, and product documentation. The complete development repository and its Git history remain private.
 
-![PaneForge Blueprint task creation and persistence acceptance](docs/media/blueprint-alpha3-acceptance.gif)
+![Two acceptance snapshots: a saved Blueprint parent and child with the selected child's description and criterion, then a separate post-restart view preserving the same relationship and selection](docs/media/blueprint-alpha3-acceptance.gif)
 
 *Animated sequence of two screenshots captured by the Windows native acceptance run: the created task tree, then the app after restart. This is not a continuous screen recording.*
+
+Frame 1 shows the saved root and child, with the child description and acceptance criterion. Frame 2 is a separate post-restart snapshot: both tasks remain, the parent link is intact, and the child remains selected. Creation persists a `planned` task; it does not dispatch a CLI or certify completion.
 
 [Open the first screenshot](docs/media/blueprint-alpha3-created.png) · [Open the post-restart screenshot](docs/media/blueprint-alpha3-reopened.png) · [Native acceptance run](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)
 
@@ -18,6 +20,7 @@ This repository is the public distribution and engineering showcase for PaneForg
 | Multi-CLI terminal | Preview | Runs several CLI sessions in split panes and tabs through PTY-backed terminals. |
 | Agent launch context | Preview | Preserves the project path, runtime, provider, skill, MCP, and session metadata used for a launch. |
 | Blueprint task board | Preview | Creates parent and child tasks with descriptions and acceptance criteria; planning is saved locally before a session is started. |
+| Agent Control Plane records | Preview | Shows task trees, scoped intervention/recovery histories, and global delegation/plugin records; records are not proof of process execution. |
 | Git and worktree tools | Preview | Exposes branch status and common repository operations next to the active terminal. |
 | File history and editor | Preview | Provides a local history timeline, diffs, file browsing, and an in-app code editor. |
 | MCP and Skill configuration | Preview | Keeps tool and skill selection visible at workspace/project boundaries. |
@@ -25,6 +28,36 @@ This repository is the public distribution and engineering showcase for PaneForg
 | Blueprint execution policy | Development | Run profiles, frozen team templates, human handoff cards, and delivery evidence are being integrated in the private development line. |
 
 The status labels are deliberate. A capability marked `Development` must not be inferred from the current public installer. See [public scope](docs/engineering/public-scope.md) for the exact boundary.
+
+## Control Plane visual tour
+
+These are three separate, read-only Control Plane views captured during isolated Windows acceptance on 2026-09-19. The records are synthetic `[TEST FIXTURE]` data. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are panel crops without app chrome or a version label. None is a screenshot of the current `0.0.3-alpha.3` installer. The current-release evidence is the Blueprint persistence sequence above.
+
+### Task tree and runtime identity
+
+The upper half shows a parent in progress and its indented child marked complete. The selected child's detail pane names its node (`smoke-child`), parent (`smoke-root`), session (`smoke-session`) and attempt (`smoke-attempt-child`) separately. It also shows business state, runtime health, revision and update time. This is useful when checking that a task projection has preserved hierarchy and identity instead of treating a title or terminal transcript as the whole task record.
+
+<a href="docs/media/control-plane-task-tree-dev.png"><img src="docs/media/control-plane-task-tree-dev.png" width="339" alt="Historical PaneForge task-tree panel: a synthetic parent marked in progress contains a selected child marked complete; the detail pane lists separate node, parent, session and attempt IDs, business state, runtime health, revision and update time"></a>
+
+The rows and IDs are test fixtures. The image demonstrates how the UI displays stored task and runtime fields; it does not show a live CLI process, prove that an Agent completed the task, or show the current alpha.3 installer. See [task-tree and runtime identity notes](docs/product-capabilities.md#task-tree-and-runtime-identity) and [open the image at full size](docs/media/control-plane-task-tree-dev.png).
+
+### Intervention and recovery history
+
+This view intentionally separates two scopes. The intervention ledger is for node `p12b-node` and contains a pause request plus a message request from the current and an earlier attempt. The recovery ledger is for session `p12b-session`: it shows a disconnected-to-ready recovery for the selected node and a degraded-to-ready record for another node in the same session. Actor, reason, timestamp, node and attempt labels let a reviewer see which event belongs to which scope and attempt.
+
+<a href="docs/media/control-plane-history-dev.png"><img src="docs/media/control-plane-history-dev.png" width="339" alt="Historical read-only history panel with synthetic entries: node-scoped pause and message requests, plus session-scoped recovery from disconnected or degraded to ready, including an earlier attempt and another node in the same session"></a>
+
+These are synthetic ledger rows, not conversation messages and not evidence that an intervention or recovery action was actually performed. The screen is read-only. See [intervention and recovery history notes](docs/product-capabilities.md#intervention-and-recovery-history) and [open the image at full size](docs/media/control-plane-history-dev.png).
+
+### Global delegation and plugin records
+
+The left section labels delegation reviews as global and pairs decisions with their review reasons: a bounded tests-and-docs request is approved, while a production-deployment request is rejected. The right section labels the plugin registry as global and distinguishes an enabled build inspector from a registered network reporter. The notice above both ledgers explicitly says that review and registration records do not mean an Agent or plugin executed.
+
+<a href="docs/media/control-plane-governance-dev.png"><img src="docs/media/control-plane-governance-dev.png" width="339" alt="Historical global governance panel with synthetic delegation decisions and review reasons beside plugin registry entries with distinct enabled and registered states; an explicit notice says records do not prove execution"></a>
+
+All names, actors, grants and decisions are test fixtures. This is a read-only projection: the image does not demonstrate a delegated run, plugin launch, plugin side effect, or host sandbox. See [global governance record notes](docs/product-capabilities.md#global-governance-records) and [open the image at full size](docs/media/control-plane-governance-dev.png).
+
+See the [control-plane feature notes](docs/product-capabilities.md#agent-control-plane-records), [acceptance case](docs/engineering/portfolio-evidence.md#case-study-c-scoped-control-plane-projections) and [image provenance](docs/media/README.md) for precise scope, date, source identity and hashes.
 
 ## How the system is organized
 

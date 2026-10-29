@@ -4,9 +4,11 @@ PaneForge 是面向并行 AI 工程的本地优先桌面控制平面。它把多
 
 本仓库是 PaneForge 的公开分发仓库和求职展示入口，不是完整开发仓库镜像。这里发布安装包、更新清单、校验值、对应版本源码 ZIP、公开验收工作流和产品文档；完整开发历史、未发布功能、内部任务文件和用户数据继续保留在私有仓库。
 
-![PaneForge 蓝图任务创建与重启后持久化验收](docs/media/blueprint-alpha3-acceptance.gif)
+![两张验收截图序列：创建后显示主任务、子任务及其说明和验收标准；应用重启后仍保留任务关系并选中原子任务](docs/media/blueprint-alpha3-acceptance.gif)
 
 *动图由同一次隔离 Windows 原生验收中的两个独立截图组成：创建主/子任务后，以及应用重启后。它不是连续录屏。可查看[创建后截图](docs/media/blueprint-alpha3-created.png)、[重启后截图](docs/media/blueprint-alpha3-reopened.png)及[原生验收运行](https://github.com/lihuabin1516-design/PaneForge-Releases/actions/runs/40461026994)。*
+
+第一帧显示已保存的主任务和子任务，以及子任务说明和验收标准；第二帧来自应用重启后的另一张截图，展示两个节点仍在、父子关系保留且子任务详情仍被选中。创建操作只写入持久化的 `planned` 计划，不会派发 CLI，也不代表任务完成。
 
 ## 功能和公开状态
 
@@ -16,6 +18,7 @@ PaneForge 是面向并行 AI 工程的本地优先桌面控制平面。它把多
 | 多 CLI 分屏终端 | Preview | 通过 PTY 和 xterm.js 同时运行多个 CLI 会话，支持标签与分屏。 |
 | 启动上下文 | Preview | 记录项目路径、运行时、Provider、Skill、MCP 和会话身份。 |
 | 蓝图任务 | Preview | 创建主任务和子任务，保存任务说明与逐条验收标准；创建任务不会自动启动 CLI。 |
+| Agent 控制平面记录 | Preview | 展示任务树、按范围读取的人工干预/恢复历史，以及全局委派/插件记录；记录不等于进程实际执行。 |
 | Git/Worktree | Preview | 在终端旁查看分支状态并执行常用仓库操作。 |
 | 文件历史和编辑器 | Preview | 提供本地文件历史、Diff、文件浏览和内置编辑器。 |
 | MCP/Skill 配置 | Preview | 在工作空间和项目边界内显示工具与技能选择。 |
@@ -23,6 +26,36 @@ PaneForge 是面向并行 AI 工程的本地优先桌面控制平面。它把多
 | 蓝图启动预览、团队冻结、人工收件箱、交付视图 | Development | 已在私有开发线推进，尚未承诺包含在当前公开安装包中。 |
 
 `Preview` 表示当前公开抢先版包含或验证过的能力；`Development` 表示私有开发线已设计或实现，但不能从公开安装包推断其已经发布。完整边界见 [公开范围说明](docs/engineering/public-scope.md)。
+
+## 控制平面图集
+
+以下是 2026-09-19 隔离 Windows 验收期间生成的三张只读控制平面视图，图中记录均为 `[TEST FIXTURE]` 合成测试数据。配套的 P1.2c UI 验收快照记录测试应用为 `PaneForge DEV v0.0.1`；三张 PNG 本身都只截取面板，不包含应用标题栏或版本标识。它们都不是当前 `0.0.3-alpha.3` 安装包的截图。当前公开版验收画面请看本文开头的蓝图持久化序列。
+
+### 任务树与运行时身份
+
+上半部分显示一个“进行中”的父任务及其缩进子任务，子任务状态为“已完成”。下半部分是所选子任务详情：节点 `smoke-child`、父节点 `smoke-root`、会话 `smoke-session` 和尝试 `smoke-attempt-child` 分开列出，同时显示业务状态、运行健康、修订号和更新时间。这样可以核对树关系、选中详情及运行字段是否分别呈现，而不是把任务标题或终端文字当成全部任务记录。
+
+<a href="docs/media/control-plane-task-tree-dev.png"><img src="docs/media/control-plane-task-tree-dev.png" width="339" alt="PaneForge 历史任务树面板：合成父任务状态为进行中，选中的子任务状态为已完成；详情分别列出节点、父节点、会话、尝试 ID、业务状态、运行健康、修订号和更新时间"></a>
+
+行和标识都是测试 fixture。图片证明的是界面如何投影保存的任务/运行字段，不证明曾经启动真实 CLI、Agent 确实完成了任务，也不是当前 alpha.3 安装包画面。详见[任务树与运行时身份说明](docs/product-capabilities.md#task-tree-and-runtime-identity)，或[打开原尺寸图片](docs/media/control-plane-task-tree-dev.png)。
+
+### 人工干预与运行恢复历史
+
+这个视图刻意分开两个作用范围：人工干预账本属于节点 `p12b-node`，列出暂停请求和消息请求，并标出当前及较早的尝试；运行恢复账本属于会话 `p12b-session`，显示所选节点从“已断开”恢复到“就绪”，以及同一会话另一个节点从“降级”恢复到“就绪”。操作者、原因、时间、节点和尝试标记帮助审阅者判断每条记录归属哪个范围和尝试。
+
+<a href="docs/media/control-plane-history-dev.png"><img src="docs/media/control-plane-history-dev.png" width="339" alt="PaneForge 历史只读记录面板，包含合成节点级暂停/消息请求，以及会话级断开或降级到就绪的恢复记录，并标出旧尝试和同会话的其他节点"></a>
+
+这些是合成账本行，不是聊天内容，也不证明人工干预或运行恢复动作真的执行过；该界面为只读。详见[人工干预与运行恢复历史说明](docs/product-capabilities.md#intervention-and-recovery-history)，或[打开原尺寸图片](docs/media/control-plane-history-dev.png)。
+
+### 全局委派与插件记录
+
+左侧“委派评审”标明全局范围，并把决定与理由并列展示：有边界的测试/文档请求获批，生产部署请求被拒绝。右侧“插件注册表”同样标明全局范围，并区分“已启用”的构建检查插件与“已注册”的网络报告插件。顶部提示明确说明：评审和注册记录不代表 Agent 或插件已经执行。
+
+<a href="docs/media/control-plane-governance-dev.png"><img src="docs/media/control-plane-governance-dev.png" width="339" alt="PaneForge 历史全局治理面板：左侧为带审核理由的合成委派决定，右侧为状态不同的插件注册项，并显示记录不证明实际执行的提示"></a>
+
+名称、操作者、授权和决定均为测试 fixture。这是只读投影；图片不证明发生过委派运行、插件启动或副作用，也不证明存在宿主沙箱。详见[全局治理记录说明](docs/product-capabilities.md#global-governance-records)，或[打开原尺寸图片](docs/media/control-plane-governance-dev.png)。
+
+可核对[控制平面功能说明](docs/product-capabilities.md#agent-control-plane-records)、[工程验收案例](docs/engineering/portfolio-evidence.md#case-study-c-scoped-control-plane-projections)和[图片来源、版本与哈希](docs/media/README.md)。
 
 ## 下载与更新
 

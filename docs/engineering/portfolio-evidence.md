@@ -51,7 +51,26 @@ Browse [capability model](../../showcase/source/v0.0.3-alpha.3/paneforge-core/sr
 
 The acceptance record reports 14 focused host-adapter tests. It explicitly states that no arbitrary network, credential-store, DOM, or UI side effect is exposed by this slice. This claim must not be shortened to “plugins run in a sandbox.”
 
-## Case study C: traceable Windows distribution
+## Case study C: scoped Control Plane projections
+
+### Problem
+
+Task status, human decisions and runtime-recovery facts have different owners and scopes. A UI that merges them into one generic activity list can show stale data under a new selection or imply execution from an approval record.
+
+### Implementation boundary
+
+- The task tree keeps node, parent, session, attempt, state, revision and runtime-health fields distinct. Missing health is reported as missing, not healthy.
+- Intervention history is node-scoped; recovery history is session-scoped. They load and fail independently, retain labelled last-successful snapshots and discard obsolete responses after selection changes.
+- Delegation and plugin registry projections are explicitly global. Registry and review records do not claim that an Agent or plugin ran.
+- These views expose records and governed review decisions, not arbitrary runtime dispatch or plugin side effects.
+
+### Visual and verification evidence
+
+The [task-tree image](../media/control-plane-task-tree-dev.png), [scoped-history image](../media/control-plane-history-dev.png) and [global-governance image](../media/control-plane-governance-dev.png) are historical Windows acceptance captures from 2026-09-19. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are cropped panels without version labels. All displayed records are synthetic fixtures. None is a current alpha.3 installer screenshot; see [media provenance](../media/README.md).
+
+The original development ledger records 29 focused task-tree tests, 40 scoped-history tests and 51 global-governance tests, with isolated Windows WebView2 interaction for these slices. These historical counts were not rerun for this documentation update and must not be presented as new CI results. The exact source snapshot is available in the alpha.3 GPL archive.
+
+## Case study D: traceable Windows distribution
 
 The public build workflow accepts an exact version, source commit, and source archive SHA-256. It downloads the matching source archive, verifies identity and lockfiles, runs source checks, builds an unsigned package in a read-only-public repository workflow, installs into a temporary program directory, and runs native smoke checks. Signing credentials are not available to the source-build job.
 

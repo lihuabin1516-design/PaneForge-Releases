@@ -57,6 +57,24 @@ The desktop combines common Git and worktree operations with a project file brow
 
 MCP servers and Skills can be configured for the applicable workspace or project. PaneForge presents this configuration near the launch context so operators can inspect which tools are available. A configured third-party MCP server or CLI still has the permissions granted by its own runtime and account.
 
+### Agent Control Plane records
+
+The alpha.3 preview includes task-tree, scoped-history and governance-record surfaces:
+
+#### Task tree and runtime identity
+
+The task tree separates node, parent, session, attempt, business state, revision and runtime-health fields. Missing health is shown as not reported rather than inferred as healthy. Creating a Blueprint task does not start a session or imply that a CLI executed it.
+
+#### Intervention and recovery history
+
+Intervention history is scoped to a task node; runtime-recovery history is scoped to a session. The two ledgers can refresh or fail independently, and stale data is labelled instead of silently replaced with an empty state. Older attempts and recoveries for another node in the same session retain their provenance labels.
+
+#### Global governance records
+
+Delegation and plugin registries are labelled as global records. Their presence or approval status is not evidence that an Agent or plugin process executed. Governance screens expose review/audit context, not operating-system process isolation or permission to execute arbitrary plugin side effects.
+
+The [control-plane visual tour](../README.md#control-plane-visual-tour) explains three historical Windows acceptance captures, including the visible fields and the evidence boundary for each view. The companion P1.2c UI acceptance snapshot records the tested app as `PaneForge DEV v0.0.1`; all three PNGs are cropped without version labels. All three use synthetic fixtures and none is a screenshot of the current alpha.3 installer. The current release's Blueprint persistence acceptance is shown at the top of this page.
+
 ## Blueprint workflow in development
 
 The private development line is extending task planning toward an auditable execution and delivery loop:
@@ -125,10 +143,13 @@ PaneForge 面向需要监督多个 AI 编程会话的开发者。它的目标是
 - **蓝图任务规划：**alpha.3 支持新建主任务和子任务，填写标题、说明及逐条验收标准，并保存到本地数据库、保留父子关系。新任务会被选中以便继续规划。
 - **仓库与文件工作：**在桌面中结合常用 Git/Worktree 操作、文件浏览器、代码编辑器、本地文件历史和 Diff，便于在终端旁检查仓库状态；这些功能不取代 Git 作为版本历史的权威来源。
 - **MCP 与 Skill：**在适用的工作空间或项目范围配置工具和技能，并靠近启动上下文进行检查。第三方 CLI/MCP 仍具有其运行时和账户本身授予的权限。
+- **Agent 控制平面记录：**任务树区分节点、父节点、会话、尝试、业务状态、修订号和运行健康；人工干预按节点、运行恢复按会话查询；委派及插件注册记录标记为全局范围。记录或审批状态不能证明 Agent/插件进程实际执行。
 
 PaneForge 不提供模型或 Provider 账号。应用元数据保存在本地；选用的 CLI/Provider 可能依照自身设置和策略传输提示词、项目内容或遥测数据。
 
 创建任务不会启动 CLI、自动指派 Worker，也不会宣称验收标准已经通过。尚未关联会话的任务会保持未分配状态。
+
+[控制平面图集](../README.zh-CN.md#控制平面图集)逐张说明三幅历史 Windows 验收画面中的可见字段及证据边界。配套 P1.2c UI 验收快照记录测试应用为 `PaneForge DEV v0.0.1`；三张 PNG 本身都裁去了版本标识。它们使用合成 fixture，且都不是当前 alpha.3 安装包画面。当前版蓝图持久化验收图位于本页顶部；图像版本、来源和哈希见[媒体说明](media/README.md)。
 
 ### 蓝图开发线方向，尚未纳入 alpha.3 承诺
 
