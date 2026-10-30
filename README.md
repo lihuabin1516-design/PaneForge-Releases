@@ -70,10 +70,10 @@ flowchart LR
 | [Method Layer](https://github.com/lihuabin1516-design/method-layer) | Versioned task, run, evidence, and handoff artifacts for reviewable work. | Public; original project materials are MIT-licensed, with external references retaining their own terms. |
 | [Hooks Governance Layer](https://github.com/lihuabin1516-design/hooks) | Task scope, project policy, hook gates, audit records, and acceptance evidence. | Public; MIT is declared, with contributor-rights confirmation still pending. |
 | [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion) | Windows launch and diagnostic companion with an optional coordination-plane path. Its README explicitly distinguishes implemented launcher capabilities from unfinished external acceptance and dispatch work. | Private; MIT. |
-| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | Read-only composition of existing output, observability, and experience artifacts into a hash-checked workflow index. | Private; MIT-licensed, but not publicly accessible. |
-| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | Read-only packaging of existing workflow and verification evidence for human handoff; it is not the authority that decides completion. | Private; MIT-licensed, but not publicly accessible. |
+| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | Read-only composition of existing output, observability, and experience artifacts into a hash-checked workflow index. | Public; MIT. |
+| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | Read-only packaging of existing workflow and verification evidence for human handoff; it is not the authority that decides completion. | Public; MIT. |
 
-This access snapshot is dated 2026-10-30. Links to private repositories require access. License and repository visibility are separate decisions; any later visibility change requires a further review of repository history, sensitive data, and excluded third-party material.
+This access snapshot is dated 2026-10-30. Links to the remaining private repositories require access. License and repository visibility are separate decisions; any later visibility change requires a further review of repository history, sensitive data, and excluded third-party material.
 
 ## A five-minute product tour
 
