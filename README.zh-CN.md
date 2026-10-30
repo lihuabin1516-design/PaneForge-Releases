@@ -48,6 +48,33 @@ PaneForge 把代码仓库、多个本地编程 CLI、任务计划、Git 改动�
 
 完整能力和边界见[产品能力与工作流](docs/product-capabilities.md)。
 
+## PaneForge 周边的开发工作流
+
+PaneForge 是桌面工作台；下列仓库是独立维护的工作流工具与参考材料，并非全部打包进 `0.0.3-alpha.3` 安装程序，也不是运行该版本的必要依赖。下图说明职责与证据边界，不代表六个仓库已经组成自动运行器。
+
+```mermaid
+flowchart LR
+  P["项目需求"] --> S["Agent Skills Catalog<br/>建议性行为指导"]
+  P --> M["Method Layer<br/>task / run / evidence / handoff"]
+  R["Agent 运行时事件"] --> H["Hooks Governance Layer<br/>范围 / 策略 / 门禁 / 审计"]
+  O["产出与可观测性报告"] --> I["Sidecar Composition Index<br/>只读索引与哈希校验"]
+  H -->|验证与审计证据| A["Acceptance Pack<br/>只读证据包"]
+  I -->|工作流索引| A
+  A --> V["人工审查与交接"]
+  C["Codex Desktop Companion<br/>可选 Windows 启动与诊断"] -. 可选宿主集成 .-> R
+```
+
+| 仓库 | 在工作流中的职责 | 当前访问与许可状态 |
+| --- | --- | --- |
+| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills) | 提供建议性 prompts、skills、模板、采纳记录和评估样例；不授予权限，也不判定任务完成。 | 私有；许可证与来源审查待完成。 |
+| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | 用版本化 task、run、evidence、handoff artifact 支持可审查的任务过程。 | 公开；未声明许可证，不代表授予再分发权。 |
+| [Hooks Governance Layer](https://github.com/lihuabin1516-design/hooks) | 管理任务范围、项目策略、hook 门禁、审计记录和验收证据。 | 公开；MIT。 |
+| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion) | Windows 启动与诊断伴侣，并包含可选的协调平面路径；项目说明区分了已实现的启动能力和仍待外部验收、派发的工作。 | 私有；MIT。 |
+| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | 只读组合已有产出、可观测性和经验 artifact，生成经过哈希校验的工作流索引。 | 私有；许可证与来源审查待完成。 |
+| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | 将已有工作流与验证证据只读打包用于人工交接；它本身不拥有完成判定权。 | 私有；许可证与来源审查待完成。 |
+
+以上访问状态截至 2026-10-30。私有仓库链接需要相应权限；仓库公开可见也不等于已授予开源许可。其他仓库在完成源码、归属和许可证审查之前不会开放。
+
 ## 五分钟产品导览
 
 ### 1. 组织项目

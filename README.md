@@ -48,6 +48,33 @@ AI-assisted development becomes difficult to supervise when every session is jus
 
 See the [capability boundary](docs/product-capabilities.md) for the complete public-preview list and its limits.
 
+## The development workflow around PaneForge
+
+PaneForge is the desktop workbench. The repositories below are independently maintained workflow tools and references; they are not all bundled into, or required by, the `0.0.3-alpha.3` installer. The diagram describes evidence and responsibility boundaries, not an automatic six-repository runner.
+
+```mermaid
+flowchart LR
+  P["Project request"] --> S["Agent Skills Catalog<br/>advisory guidance"]
+  P --> M["Method Layer<br/>task / run / evidence / handoff"]
+  R["Agent runtime events"] --> H["Hooks Governance Layer<br/>scope / policy / gates / audit"]
+  O["Output and observability reports"] --> I["Sidecar Composition Index<br/>read-only links and hashes"]
+  H -->|verification and audit evidence| A["Acceptance Pack<br/>read-only evidence bundle"]
+  I -->|workflow index| A
+  A --> V["Human review and handoff"]
+  C["Codex Desktop Companion<br/>optional Windows launch and diagnostics"] -. optional host integration .-> R
+```
+
+| Repository | Role in the workflow | Current access and license |
+| --- | --- | --- |
+| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills) | Advisory prompts, skills, templates, adoption records, and evaluation examples. It does not grant permissions or decide completion. | Private; license and source review pending. |
+| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | Versioned task, run, evidence, and handoff artifacts for reviewable work. | Public; no license is declared, so redistribution rights are not granted. |
+| [Hooks Governance Layer](https://github.com/lihuabin1516-design/hooks) | Task scope, project policy, hook gates, audit records, and acceptance evidence. | Public; MIT. |
+| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion) | Windows launch and diagnostic companion with an optional coordination-plane path. Its README explicitly distinguishes implemented launcher capabilities from unfinished external acceptance and dispatch work. | Private; MIT. |
+| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | Read-only composition of existing output, observability, and experience artifacts into a hash-checked workflow index. | Private; license and source review pending. |
+| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | Read-only packaging of existing workflow and verification evidence for human handoff; it is not the authority that decides completion. | Private; license and source review pending. |
+
+This access snapshot is dated 2026-10-30. Links to private repositories require access, and public visibility alone does not provide an open-source license. The exact source, attribution, and license review must be completed before any further repository is opened.
+
 ## A five-minute product tour
 
 ### 1. Organize a project
