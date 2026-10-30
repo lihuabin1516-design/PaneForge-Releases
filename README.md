@@ -66,14 +66,14 @@ flowchart LR
 
 | Repository | Role in the workflow | Current access and license |
 | --- | --- | --- |
-| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills) | Advisory prompts, skills, templates, adoption records, and evaluation examples. It does not grant permissions or decide completion. | Private; no repository-wide license. A mixed-source archive remains excluded from redistribution. |
-| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | Versioned task, run, evidence, and handoff artifacts for reviewable work. | Public; original project materials are MIT-licensed, with external references retaining their own terms. |
+| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills-public) | Advisory prompts, skills, templates, adoption records, and evaluation examples. It does not grant permissions or decide completion. | Public; MIT. Third-party notices remain applicable, and the mixed-source archive is excluded. |
+| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | Versioned task, run, evidence, and handoff artifacts for reviewable work. | Public; MIT. Third-party source notices retain their own terms. |
 | [Hooks Governance Layer](https://github.com/lihuabin1516-design/hooks) | Task scope, project policy, hook gates, audit records, and acceptance evidence. | Public; MIT is declared. The repository owner confirms the historical `AI001` GitHub account is theirs; external-source attribution remains a separate matter. |
-| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion) | Windows launch and diagnostic companion with an optional coordination-plane path. Its README explicitly distinguishes implemented launcher capabilities from unfinished external acceptance and dispatch work. | Private; MIT. |
+| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion-public) | Windows launch and diagnostic companion with an optional coordination-plane path. Its README explicitly distinguishes implemented launcher capabilities from unfinished external acceptance and dispatch work. | Public; MIT. |
 | [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | Read-only composition of existing output, observability, and experience artifacts into a hash-checked workflow index. | Public; MIT. |
 | [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | Read-only packaging of existing workflow and verification evidence for human handoff; it is not the authority that decides completion. | Public; MIT. |
 
-This access snapshot is dated 2026-10-30. Links to the remaining private repositories require access. License and repository visibility are separate decisions; any later visibility change requires a further review of repository history, sensitive data, and excluded third-party material.
+This access snapshot is dated 2026-10-30. All six repositories are public. Repository visibility and license obligations are separate; consult each repository's license and third-party notices for its redistribution boundaries.
 
 ## A five-minute product tour
 

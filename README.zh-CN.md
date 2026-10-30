@@ -66,14 +66,14 @@ flowchart LR
 
 | 仓库 | 在工作流中的职责 | 当前访问与许可状态 |
 | --- | --- | --- |
-| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills) | 提供建议性 prompts、skills、模板、采纳记录和评估样例；不授予权限，也不判定任务完成。 | 私有；许可证与来源审查待完成。 |
-| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | 用版本化 task、run、evidence、handoff artifact 支持可审查的任务过程。 | 公开；未声明许可证，不代表授予再分发权。 |
+| [Agent Skills Catalog](https://github.com/lihuabin1516-design/agnetskills-public) | 提供建议性 prompts、skills、模板、采纳记录和评估样例；不授予权限，也不判定任务完成。 | 公开；MIT。第三方声明继续适用，混合来源归档不在公开分发范围内。 |
+| [Method Layer](https://github.com/lihuabin1516-design/method-layer) | 用版本化 task、run、evidence、handoff artifact 支持可审查的任务过程。 | 公开；MIT。第三方来源材料仍按各自声明处理。 |
 | [Hooks Governance Layer](https://github.com/lihuabin1516-design/hooks) | 管理任务范围、项目策略、hook 门禁、审计记录和验收证据。 | 公开；MIT。 |
-| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion) | Windows 启动与诊断伴侣，并包含可选的协调平面路径；项目说明区分了已实现的启动能力和仍待外部验收、派发的工作。 | 私有；MIT。 |
-| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | 只读组合已有产出、可观测性和经验 artifact，生成经过哈希校验的工作流索引。 | 私有；许可证与来源审查待完成。 |
-| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | 将已有工作流与验证证据只读打包用于人工交接；它本身不拥有完成判定权。 | 私有；许可证与来源审查待完成。 |
+| [Codex Desktop Companion](https://github.com/lihuabin1516-design/codex-desktop-companion-public) | Windows 启动与诊断伴侣，并包含可选的协调平面路径；项目说明区分了已实现的启动能力和仍待外部验收、派发的工作。 | 公开；MIT。 |
+| [Sidecar Composition Index](https://github.com/lihuabin1516-design/Sidecar-composition-index) | 只读组合已有产出、可观测性和经验 artifact，生成经过哈希校验的工作流索引。 | 公开；MIT。 |
+| [Acceptance Pack](https://github.com/lihuabin1516-design/acceptance-pack) | 将已有工作流与验证证据只读打包用于人工交接；它本身不拥有完成判定权。 | 公开；MIT。 |
 
-以上访问状态截至 2026-10-30。私有仓库链接需要相应权限；仓库公开可见也不等于已授予开源许可。其他仓库在完成源码、归属和许可证审查之前不会开放。
+以上访问状态截至 2026-10-30，六个仓库均为公开。仓库可见性与许可证义务是两回事；再分发前应分别阅读各仓库的许可证和第三方声明。
 
 ## 五分钟产品导览
 
